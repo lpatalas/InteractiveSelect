@@ -56,10 +56,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
         if (listItems.Count > 0)
         {
-            foreach (var item in listItems)
-            {
-                WriteObject(item);
-            }
+            new ListView(listItems).RunLoop(Host.UI, 10);
         }
         else
         {
