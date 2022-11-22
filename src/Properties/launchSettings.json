@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "InteractiveSelect": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+      "commandLineArgs": "-ExecutionPolicy RemoteSigned -NoLogo -NoProfile -NoExit -File \"DebugProfile.ps1\""
+    }
+  }
+}

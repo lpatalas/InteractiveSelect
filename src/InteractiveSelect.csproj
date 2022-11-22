@@ -9,4 +9,10 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DebugProfile.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
