@@ -7,7 +7,7 @@ namespace InteractiveSelect;
 internal class CollectionView<T>
     where T : class
 {
-    private string? filter;
+    private string filter = string.Empty;
     private readonly Func<T, string, bool> filterPredicate;
     private readonly List<T> items;
     private readonly IReadOnlyList<T> originalItems;
@@ -15,7 +15,7 @@ internal class CollectionView<T>
     public T this[int index] => items[index];
 
     public int Count => items.Count;
-    public string? Filter { get => filter; set => SetFilter(value); }
+    public string Filter { get => filter; set => SetFilter(value); }
     public int? HighlightedIndex { get; private set; }
     public T? HighlightedItem => HighlightedIndex.HasValue ? items[HighlightedIndex.Value] : default;
     public int PageSize { get; }
@@ -34,14 +34,14 @@ internal class CollectionView<T>
         PageSize = pageSize;
     }
 
-    private void SetFilter(string? filter)
+    private void SetFilter(string filter)
     {
         this.filter = filter;
 
         var oldHighlightedItem = HighlightedItem;
 
         items.Clear();
-        if (filter != null)
+        if (filter.Length > 0)
         {
             foreach (var item in originalItems)
             {
@@ -104,7 +104,7 @@ internal class CollectionView<T>
                 ScrollOffset = HighlightedIndex.Value - PageSize + 1;
 
             if (ScrollOffset + PageSize > items.Count)
-                ScrollOffset = items.Count - PageSize;
+                ScrollOffset = Math.Max(0, items.Count - PageSize);
         }
         else
         {

@@ -35,8 +35,8 @@ internal class ListView
             switch (pressedKey.Key)
             {
                 case ConsoleKey.Escape:
-                    if (listItems.Filter != null)
-                        listItems.Filter = null;
+                    if (listItems.Filter.Length > 0)
+                        listItems.Filter = string.Empty;
                     else
                         isExiting = true;
                     break;
@@ -90,9 +90,13 @@ internal class ListView
                 false => ConsoleColor.DarkGray
             };
 
-            var item = listItems[itemIndex];
-            hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
-            lineBuffer.Append(item.Label);
+            if (itemIndex < listItems.Count)
+            {
+                var item = listItems[itemIndex];
+                hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
+                lineBuffer.Append(item.Label);
+            }
+
             if (lineBuffer.Length < lineWidth)
                 lineBuffer.Append(' ', lineWidth - lineBuffer.Length);
 
