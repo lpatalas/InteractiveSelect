@@ -93,13 +93,13 @@ internal class ListView
             if (itemIndex < listItems.Count)
             {
                 var item = listItems[itemIndex];
-                hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
                 lineBuffer.Append(item.Label);
             }
 
             if (lineBuffer.Length < lineWidth)
                 lineBuffer.Append(' ', lineWidth - lineBuffer.Length);
 
+            hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
             hostUI.Write(ConsoleColor.Cyan, backgroundColor, lineBuffer.ToString());
         }
     }
