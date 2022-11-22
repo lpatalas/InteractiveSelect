@@ -8,15 +8,11 @@ namespace InteractiveSelect;
 
 internal class ListView
 {
-    private int highlightedIndex;
-    private readonly IReadOnlyList<ListItem> listItems;
-    private int scrollOffset;
-    private readonly int pageSize;
+    private readonly CollectionView<ListItem> listItems;
 
     public ListView(IReadOnlyList<ListItem> listItems, int pageSize)
     {
-        this.listItems = listItems;
-        this.pageSize = pageSize;
+        this.listItems = new CollectionView<ListItem>(listItems, pageSize);
     }
 
     public void RunLoop(PSHostUserInterface hostUI, int maxHeight)
@@ -39,22 +35,22 @@ internal class ListView
                     isExiting = true;
                     break;
                 case ConsoleKey.UpArrow:
-                    SetHighlightedIndex(highlightedIndex - 1);
+                    listItems.SetHighlightedIndex(listItems.HighlightedIndex - 1);
                     break;
                 case ConsoleKey.DownArrow:
-                    SetHighlightedIndex(highlightedIndex + 1);
+                    listItems.SetHighlightedIndex(listItems.HighlightedIndex + 1);
                     break;
                 case ConsoleKey.Home:
-                    SetHighlightedIndex(0);
+                    listItems.SetHighlightedIndex(0);
                     break;
                 case ConsoleKey.End:
-                    SetHighlightedIndex(listItems.Count - 1);
+                    listItems.SetHighlightedIndex(listItems.Count - 1);
                     break;
                 case ConsoleKey.PageUp:
-                    SetHighlightedIndex(highlightedIndex - pageSize + 1);
+                    listItems.SetHighlightedIndex(listItems.HighlightedIndex - listItems.PageSize + 1);
                     break;
                 case ConsoleKey.PageDown:
-                    SetHighlightedIndex(highlightedIndex + pageSize - 1);
+                    listItems.SetHighlightedIndex(listItems.HighlightedIndex + listItems.PageSize - 1);
                     break;
             }
         }
@@ -62,26 +58,17 @@ internal class ListView
         ClearConsole(area, hostUI);
     }
 
-    private void SetHighlightedIndex(int newIndex)
-    {
-        highlightedIndex = Math.Clamp(newIndex, 0, listItems.Count - 1);
-        if (highlightedIndex < scrollOffset)
-            scrollOffset = highlightedIndex;
-        else if (highlightedIndex >= scrollOffset + pageSize)
-            scrollOffset = highlightedIndex - pageSize + 1;
-    }
-
     private void DrawItems(Rectangle area, PSHostUserInterface hostUI)
     {
         var lineWidth = area.GetWidth();
         var lineBuffer = new StringBuilder(lineWidth);
 
-        for (int lineIndex = 0; lineIndex < pageSize; lineIndex++)
+        for (int lineIndex = 0; lineIndex < listItems.PageSize; lineIndex++)
         {
             lineBuffer.Clear();
 
-            int itemIndex = lineIndex + scrollOffset;
-            var backgroundColor = (highlightedIndex == itemIndex) switch
+            int itemIndex = lineIndex + listItems.ScrollOffset;
+            var backgroundColor = (listItems.HighlightedIndex == itemIndex) switch
             {
                 true => ConsoleColor.Red,
                 false => ConsoleColor.DarkGray
