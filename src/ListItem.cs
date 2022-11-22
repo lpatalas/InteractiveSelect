@@ -2,6 +2,6 @@
 
 namespace InteractiveSelect;
 
-internal readonly record struct ListItem(string Label, PSObject? Value)
+internal record ListItem(string Label, PSObject? Value)
 {
 }

@@ -12,7 +12,10 @@ internal class ListView
 
     public ListView(IReadOnlyList<ListItem> listItems, int pageSize)
     {
-        this.listItems = new CollectionView<ListItem>(listItems, pageSize);
+        this.listItems = new CollectionView<ListItem>(
+            listItems,
+            pageSize,
+            (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase));
     }
 
     public void RunLoop(PSHostUserInterface hostUI, int maxHeight)
@@ -32,7 +35,10 @@ internal class ListView
             switch (pressedKey.Key)
             {
                 case ConsoleKey.Escape:
-                    isExiting = true;
+                    if (listItems.Filter != null)
+                        listItems.Filter = null;
+                    else
+                        isExiting = true;
                     break;
                 case ConsoleKey.UpArrow:
                     listItems.SetHighlightedIndex(listItems.HighlightedIndex - 1);
@@ -51,6 +57,16 @@ internal class ListView
                     break;
                 case ConsoleKey.PageDown:
                     listItems.SetHighlightedIndex(listItems.HighlightedIndex + listItems.PageSize - 1);
+                    break;
+                case ConsoleKey.Backspace:
+                    if (listItems.Filter != null && listItems.Filter.Length > 0)
+                        listItems.Filter = listItems.Filter.Substring(0, listItems.Filter.Length - 1);
+                    break;
+                default:
+                    if (char.IsLetter(pressedKey.KeyChar))
+                    {
+                        listItems.Filter = (listItems.Filter ?? "") + pressedKey.KeyChar;
+                    }
                     break;
             }
         }
