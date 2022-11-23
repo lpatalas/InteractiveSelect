@@ -56,7 +56,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
         if (listItems.Count > 0)
         {
-            new ListView(listItems, 10).RunLoop(Host.UI, 10);
+            new ListView(listItems, 10).RunLoop(Host.UI);
         }
         else
         {

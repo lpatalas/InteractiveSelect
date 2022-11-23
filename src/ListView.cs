@@ -18,9 +18,9 @@ internal class ListView
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase));
     }
 
-    public void RunLoop(PSHostUserInterface hostUI, int maxHeight)
+    public void RunLoop(PSHostUserInterface hostUI)
     {
-        var actualHeight = Math.Min(listItems.Count, maxHeight);
+        var actualHeight = Math.Min(listItems.Count, listItems.PageSize + 1);
         var area = new Rectangle(
             0,
             hostUI.RawUI.CursorPosition.Y,
@@ -30,7 +30,8 @@ internal class ListView
         var isExiting = false;
         while (!isExiting)
         {
-            DrawItems(area, hostUI);
+            Draw(area, hostUI);
+
             var pressedKey = Console.ReadKey(intercept: true);
             switch (pressedKey.Key)
             {
@@ -74,15 +75,41 @@ internal class ListView
         ClearConsole(area, hostUI);
     }
 
+    private void Draw(Rectangle area, PSHostUserInterface hostUI)
+    {
+        DrawFilter(new Rectangle(area.Left, area.Top, area.Right, area.Top + 1), hostUI);
+        DrawItems(new Rectangle(area.Left, area.Top + 1, area.Right, area.Bottom), hostUI);
+    }
+
+    private void DrawFilter(Rectangle area, PSHostUserInterface hostUI)
+    {
+        var lineRenderer = new LineRenderer(hostUI, area.GetWidth());
+
+        if (listItems.Filter.Length > 0)
+        {
+            lineRenderer.DrawLine(
+                $"> {listItems.Filter}",
+                area.GetTopLeft(),
+                ConsoleColor.Yellow,
+                ConsoleColor.Black);
+        }
+        else
+        {
+            lineRenderer.DrawLine(
+                $"(no filter)",
+                area.GetTopLeft(),
+                ConsoleColor.DarkGray,
+                ConsoleColor.Black);
+        }
+    }
+
     private void DrawItems(Rectangle area, PSHostUserInterface hostUI)
     {
         var lineWidth = area.GetWidth();
-        var lineBuffer = new StringBuilder(lineWidth);
+        var lineRenderer = new LineRenderer(hostUI, lineWidth);
 
         for (int lineIndex = 0; lineIndex < listItems.PageSize; lineIndex++)
         {
-            lineBuffer.Clear();
-
             int itemIndex = lineIndex + listItems.ScrollOffset;
             var backgroundColor = (listItems.HighlightedIndex == itemIndex) switch
             {
@@ -90,17 +117,9 @@ internal class ListView
                 false => ConsoleColor.DarkGray
             };
 
-            if (itemIndex < listItems.Count)
-            {
-                var item = listItems[itemIndex];
-                lineBuffer.Append(item.Label);
-            }
-
-            if (lineBuffer.Length < lineWidth)
-                lineBuffer.Append(' ', lineWidth - lineBuffer.Length);
-
-            hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
-            hostUI.Write(ConsoleColor.Cyan, backgroundColor, lineBuffer.ToString());
+            var pos = new Coordinates(area.Left, area.Top + lineIndex);
+            var text = itemIndex < listItems.Count ? listItems[itemIndex].Label : string.Empty;
+            lineRenderer.DrawLine(text, pos, ConsoleColor.Cyan, backgroundColor);
         }
     }
 
