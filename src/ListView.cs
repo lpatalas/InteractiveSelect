@@ -40,9 +40,11 @@ internal class ListView
             switch (pressedKey.Key)
             {
                 case ConsoleKey.Enter:
-                    isExiting = true;
                     if (listItems.HighlightedItem is ListItem item)
+                    {
+                        isExiting = true;
                         result = new[] { item.Value };
+                    }
                     break;
                 case ConsoleKey.Escape:
                     if (!string.IsNullOrEmpty(listItems.Filter))
