@@ -36,7 +36,7 @@ internal class ListView
             switch (pressedKey.Key)
             {
                 case ConsoleKey.Escape:
-                    if (listItems.Filter.Length > 0)
+                    if (!string.IsNullOrEmpty(listItems.Filter))
                         listItems.Filter = string.Empty;
                     else
                         isExiting = true;
@@ -60,7 +60,7 @@ internal class ListView
                     listItems.SetHighlightedIndex(listItems.HighlightedIndex + listItems.PageSize - 1);
                     break;
                 case ConsoleKey.Backspace:
-                    if (listItems.Filter != null && listItems.Filter.Length > 0)
+                    if (!string.IsNullOrEmpty(listItems.Filter))
                         listItems.Filter = listItems.Filter.Substring(0, listItems.Filter.Length - 1);
                     break;
                 default:
@@ -85,7 +85,7 @@ internal class ListView
     {
         var lineRenderer = new LineRenderer(hostUI, area.GetWidth());
 
-        if (listItems.Filter.Length > 0)
+        if (!string.IsNullOrEmpty(listItems.Filter))
         {
             lineRenderer.DrawLine(
                 $"> {listItems.Filter}",
