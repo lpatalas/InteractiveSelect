@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Management.Automation;
 using System.Management.Automation.Host;
+using System.Management.Automation.Internal;
 using System.Text;
 
 namespace InteractiveSelect;
@@ -15,22 +17,21 @@ internal class LineRenderer
         this.hostUI = hostUI;
         this.lineWidth = lineWidth;
 
-        buffer = new StringBuilder(capacity: lineWidth);
+        buffer = new StringBuilder(capacity: lineWidth * 2);
     }
 
     public void DrawLine(
-        string text,
-        Coordinates coordinates,
-        ConsoleColor foregroundColor,
-        ConsoleColor backgroundColor)
+        StringDecorated text,
+        Coordinates coordinates)
     {
         buffer.Clear();
         buffer.Append(text);
 
-        if (buffer.Length < lineWidth)
-            buffer.Append(' ', lineWidth - buffer.Length);
+        if (text.ContentLength < lineWidth)
+            buffer.Append(' ', lineWidth - text.ContentLength);
+        buffer.Append(PSStyle.Instance.Reset);
 
         hostUI.RawUI.CursorPosition = coordinates;
-        hostUI.Write(foregroundColor, backgroundColor, buffer.ToString());
+        hostUI.Write(buffer.ToString());
     }
 }

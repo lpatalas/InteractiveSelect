@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Management.Automation;
+using System.Management.Automation.Internal;
 
 namespace InteractiveSelect;
 
@@ -53,7 +54,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
             false when Items is not null => CreateListItemCollection(Items),
             _ => Array.Empty<ListItem>()
         };
-
+        
         if (listItems.Count > 0)
         {
             try

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Host;
+using System.Management.Automation.Internal;
 using System.Management.Automation.Language;
 using System.Text;
 
@@ -97,18 +98,14 @@ internal class ListView
         if (!string.IsNullOrEmpty(listItems.Filter))
         {
             lineRenderer.DrawLine(
-                $"> {listItems.Filter}",
-                area.GetTopLeft(),
-                ConsoleColor.Yellow,
-                ConsoleColor.Black);
+                new StringDecorated($"{PSStyle.Instance.Foreground.BrightBlue}> {listItems.Filter}"),
+                area.GetTopLeft());
         }
         else
         {
             lineRenderer.DrawLine(
-                $"(no filter)",
-                area.GetTopLeft(),
-                ConsoleColor.DarkGray,
-                ConsoleColor.Black);
+                new StringDecorated($"{PSStyle.Instance.Foreground.BrightBlack}(no filter)"),
+                area.GetTopLeft());
         }
     }
 
@@ -122,13 +119,13 @@ internal class ListView
             int itemIndex = lineIndex + listItems.ScrollOffset;
             var backgroundColor = (listItems.HighlightedIndex == itemIndex) switch
             {
-                true => ConsoleColor.Red,
-                false => ConsoleColor.DarkGray
+                true => PSStyle.Instance.Background.Red,
+                false => string.Empty
             };
 
             var pos = new Coordinates(area.Left, area.Top + lineIndex);
             var text = itemIndex < listItems.Count ? listItems[itemIndex].Label : string.Empty;
-            lineRenderer.DrawLine(text, pos, ConsoleColor.Cyan, backgroundColor);
+            lineRenderer.DrawLine(new StringDecorated($"{backgroundColor}{text}"), pos);
         }
     }
 
