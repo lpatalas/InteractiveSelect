@@ -59,7 +59,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
             try
             {
                 Console.CursorVisible = false;
-                new ListView(listItems, 10).RunLoop(Host.UI);
+                var listView = new ListView(listItems, 10);
+                var results = listView.SelectItems(Host.UI);
+                WriteObject(results, enumerateCollection: true);
             }
             finally
             {

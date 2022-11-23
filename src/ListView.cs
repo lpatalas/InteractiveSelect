@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Language;
 using System.Text;
@@ -18,7 +20,7 @@ internal class ListView
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase));
     }
 
-    public void RunLoop(PSHostUserInterface hostUI)
+    public IEnumerable<PSObject?> SelectItems(PSHostUserInterface hostUI)
     {
         var actualHeight = Math.Min(listItems.Count, listItems.PageSize + 1);
         var area = new Rectangle(
@@ -27,6 +29,7 @@ internal class ListView
             hostUI.RawUI.BufferSize.Width,
             hostUI.RawUI.CursorPosition.Y + actualHeight);
 
+        var result = Enumerable.Empty<PSObject?>();
         var isExiting = false;
         while (!isExiting)
         {
@@ -35,6 +38,11 @@ internal class ListView
             var pressedKey = Console.ReadKey(intercept: true);
             switch (pressedKey.Key)
             {
+                case ConsoleKey.Enter:
+                    isExiting = true;
+                    if (listItems.HighlightedItem is ListItem item)
+                        result = new[] { item.Value };
+                    break;
                 case ConsoleKey.Escape:
                     if (!string.IsNullOrEmpty(listItems.Filter))
                         listItems.Filter = string.Empty;
@@ -73,6 +81,7 @@ internal class ListView
         }
 
         ClearConsole(area, hostUI);
+        return result;
     }
 
     private void Draw(Rectangle area, PSHostUserInterface hostUI)
