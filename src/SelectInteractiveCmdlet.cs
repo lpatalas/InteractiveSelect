@@ -56,7 +56,15 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
         if (listItems.Count > 0)
         {
-            new ListView(listItems, 10).RunLoop(Host.UI);
+            try
+            {
+                Console.CursorVisible = false;
+                new ListView(listItems, 10).RunLoop(Host.UI);
+            }
+            finally
+            {
+                Console.CursorVisible = true;
+            }
         }
         else
         {
