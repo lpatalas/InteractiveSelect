@@ -4,8 +4,6 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Internal;
-using System.Management.Automation.Language;
-using System.Text;
 
 namespace InteractiveSelect;
 
@@ -23,7 +21,7 @@ internal class ListView
 
     public IEnumerable<PSObject?> SelectItems(PSHostUserInterface hostUI)
     {
-        var actualHeight = Math.Min(listItems.Count, listItems.PageSize + 1);
+        var actualHeight = listItems.PageSize + 1;
         var area = new Rectangle(
             0,
             hostUI.RawUI.CursorPosition.Y,

@@ -31,7 +31,7 @@ internal class CollectionView<T>
         this.filterPredicate = filterPredicate;
 
         HighlightedIndex = items.Count > 0 ? 0 : null;
-        PageSize = pageSize;
+        PageSize = Math.Min(items.Count, pageSize);
     }
 
     private void SetFilter(string filter)
