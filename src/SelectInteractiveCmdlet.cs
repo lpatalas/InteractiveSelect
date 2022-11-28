@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Management.Automation;
+using System.Runtime.InteropServices;
 using Microsoft.PowerShell.Commands;
 
 namespace InteractiveSelect;
@@ -57,6 +58,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
         
         if (listItems.Count > 0)
         {
+            // CursorVisible is only available on Windows
+            bool? initialCursorVisibility = OperatingSystem.IsWindows() ? Console.CursorVisible : null;
+
             try
             {
                 Console.CursorVisible = false;
@@ -66,7 +70,8 @@ public class SelectInteractiveCmdlet : PSCmdlet
             }
             finally
             {
-                Console.CursorVisible = true;
+                if (initialCursorVisibility.HasValue)
+                    Console.CursorVisible = initialCursorVisibility.Value;
             }
         }
         else

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Internal;
+using Newtonsoft.Json.Serialization;
 
 namespace InteractiveSelect;
 
@@ -93,26 +94,19 @@ internal class ListView
 
     private void DrawFilter(Rectangle area, PSHostUserInterface hostUI)
     {
-        var lineRenderer = new LineRenderer(hostUI, area.GetWidth());
+        var canvas = new Canvas(hostUI, area);
+        var filterText = listItems.Filter switch
+        {
+            null or "" => $"{PSStyle.Instance.Foreground.BrightBlack}(no filter)",
+            _ => $"{PSStyle.Instance.Foreground.BrightBlue}> {listItems.Filter}"
+        };
 
-        if (!string.IsNullOrEmpty(listItems.Filter))
-        {
-            lineRenderer.DrawLine(
-                new StringDecorated($"{PSStyle.Instance.Foreground.BrightBlue}> {listItems.Filter}"),
-                area.GetTopLeft());
-        }
-        else
-        {
-            lineRenderer.DrawLine(
-                new StringDecorated($"{PSStyle.Instance.Foreground.BrightBlack}(no filter)"),
-                area.GetTopLeft());
-        }
+        canvas.FillLine(0, new StringDecorated(filterText));
     }
 
     private void DrawItems(Rectangle area, PSHostUserInterface hostUI)
     {
-        var lineWidth = area.GetWidth();
-        var lineRenderer = new LineRenderer(hostUI, lineWidth);
+        var canvas = new Canvas(hostUI, area);
 
         for (int lineIndex = 0; lineIndex < listItems.PageSize; lineIndex++)
         {
@@ -123,22 +117,14 @@ internal class ListView
                 false => string.Empty
             };
 
-            var pos = new Coordinates(area.Left, area.Top + lineIndex);
             var text = itemIndex < listItems.Count ? listItems[itemIndex].Label : string.Empty;
-            lineRenderer.DrawLine(new StringDecorated($"{backgroundColor}{text}"), pos);
+            canvas.FillLine(lineIndex, new StringDecorated($"{backgroundColor}{text}"));
         }
     }
 
     private void ClearConsole(Rectangle rectangle, PSHostUserInterface hostUI)
     {
-        var lineWidth = rectangle.GetWidth();
-        var blankString = new string(' ', lineWidth);
-        for (var y = rectangle.Top; y < rectangle.Bottom; y++)
-        {
-            hostUI.RawUI.CursorPosition = new Coordinates(rectangle.Left, y);
-            hostUI.Write(blankString);
-        }
-
-        hostUI.RawUI.CursorPosition = rectangle.GetTopLeft();
+        var canvas = new Canvas(hostUI, rectangle);
+        canvas.Clear();
     }
 }
