@@ -31,6 +31,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
     [AllowNull]
     public PSObject?[]? Items { get; set; }
 
+    [Parameter]
+    public int? MaxWidth { get; set; }
+
     private bool HasPipelineInput
         => string.Equals(ParameterSetName, ParameterSets.InputFromPipeline, StringComparison.Ordinal);
 
@@ -63,7 +66,11 @@ public class SelectInteractiveCmdlet : PSCmdlet
             try
             {
                 Console.CursorVisible = false;
-                var listView = new ListView(listItems, 10);
+                var listView = new ListView(
+                    listItems,
+                    maxWidth: MaxWidth,
+                    pageSize: 10);
+
                 var results = listView.SelectItems(Host.UI);
                 WriteObject(results, enumerateCollection: true);
             }
@@ -92,8 +99,10 @@ public class SelectInteractiveCmdlet : PSCmdlet
     private ListItem CreateListItem(PSObject? inputItem, int itemIndex)
     {
         var rawText = GetItemText(inputItem, itemIndex);
-        var text = rawText.RemoveEscapeSequencesAndControlCharacters();
-        return new ListItem(text, inputItem);
+        var plainText = new ValueStringDecorated(rawText)
+            .ToString(OutputRendering.PlainText)
+            .RemoveControlCharacters();
+        return new ListItem(plainText, inputItem);
     }
 
     private string GetItemText(PSObject? item, int itemIndex)

@@ -1,31 +1,37 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
 
 namespace InteractiveSelect;
 
-internal static partial class StringExtensions
+internal static class StringExtensions
 {
-    #region ANSI Regexes
+    public static string RemoveControlCharacters(this string input)
+    {
+        int? firstControlCharIndex = null;
 
-    // Regexes taken from: https://github.com/PowerShell/PowerShell/blob/019c3b87df68d970a98f88124c46a66179361016/src/System.Management.Automation/FormatAndOutput/common/StringDecorated.cs
-    // Copyright (c) Microsoft Corporation.
-    // Licensed under the MIT License.
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (char.IsControl(input[i]))
+            {
+                firstControlCharIndex = i;
+                break;
+            }
+        }
 
-    // graphics/color mode ESC[1;2;...m
-    private const string GraphicsRegex = @"(\x1b\[\d+(;\d+)*m)";
+        if (firstControlCharIndex.HasValue)
+        {
+            var result = new StringBuilder();
+            result.Append(input, 0, firstControlCharIndex.Value);
+            for (int i = firstControlCharIndex.Value + 1; i < input.Length; i++)
+            {
+                if (!char.IsControl(input[i]))
+                    result.Append(input[i]);
+            }
 
-    // CSI escape sequences
-    private const string CsiRegex = @"(\x1b\[\?\d+[hl])";
-
-    // Hyperlink escape sequences. Note: '.*?' makes '.*' do non-greedy match.
-    private const string HyperlinkRegex = @"(\x1b\]8;;.*?\x1b\\)";
-
-    #endregion
-
-    private const string ControlSequenceRegex = @"\p{Cc}";
-
-    [GeneratedRegex($"{ControlSequenceRegex}|{GraphicsRegex}|{CsiRegex}|{HyperlinkRegex}")]
-    private static partial Regex GetAnsiSequenceAndControlCharacterRegex();
-
-    public static string RemoveEscapeSequencesAndControlCharacters(this string input)
-        => GetAnsiSequenceAndControlCharacterRegex().Replace(input, string.Empty);
+            return result.ToString();
+        }
+        else
+        {
+            return input;
+        }
+    }
 }

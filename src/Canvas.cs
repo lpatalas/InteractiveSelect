@@ -22,17 +22,20 @@ internal class Canvas
         buffer = new StringBuilder(capacity: area.GetWidth() * 2);
     }
 
-    public void FillLine(int lineIndex, StringDecorated text)
+    public void FillLine(int lineIndex, string text)
     {
         if (lineIndex >= area.GetHeight())
             throw new PSArgumentOutOfRangeException(nameof(lineIndex));
 
-        buffer.Clear();
-        buffer.Append(text);
-
         var lineWidth = area.GetWidth();
-        if (text.ContentLength < lineWidth)
-            buffer.Append(' ', lineWidth - text.ContentLength);
+        var textDecorated = new ValueStringDecorated(text);
+        if (textDecorated.ContentLength > lineWidth)
+            textDecorated = textDecorated.AddEllipsis(lineWidth);
+
+        buffer.Clear();
+        buffer.Append(textDecorated);
+        if (textDecorated.ContentLength < lineWidth)
+            buffer.Append(' ', lineWidth - textDecorated.ContentLength);
         buffer.Append(PSStyle.Instance.Reset);
 
         hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
@@ -42,7 +45,7 @@ internal class Canvas
     public void Clear()
     {
         for (var y = 0; y < area.GetHeight(); y++)
-            FillLine(y, emptyStringDecorated);
+            FillLine(y, string.Empty);
 
         hostUI.RawUI.CursorPosition = area.GetTopLeft();
     }

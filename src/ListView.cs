@@ -11,13 +11,18 @@ namespace InteractiveSelect;
 internal class ListView
 {
     private readonly CollectionView<ListItem> listItems;
+    private readonly int? maxWidth;
 
-    public ListView(IReadOnlyList<ListItem> listItems, int pageSize)
+    public ListView(
+        IReadOnlyList<ListItem> listItems,
+        int? maxWidth,
+        int pageSize)
     {
         this.listItems = new CollectionView<ListItem>(
             listItems,
             pageSize,
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase));
+        this.maxWidth = maxWidth;
     }
 
     public IEnumerable<PSObject?> SelectItems(PSHostUserInterface hostUI)
@@ -26,7 +31,7 @@ internal class ListView
         var area = new Rectangle(
             0,
             hostUI.RawUI.CursorPosition.Y,
-            hostUI.RawUI.BufferSize.Width,
+            maxWidth.GetValueOrDefault(hostUI.RawUI.BufferSize.Width),
             hostUI.RawUI.CursorPosition.Y + actualHeight);
 
         var result = Enumerable.Empty<PSObject?>();
@@ -101,7 +106,7 @@ internal class ListView
             _ => $"{PSStyle.Instance.Foreground.BrightBlue}> {listItems.Filter}"
         };
 
-        canvas.FillLine(0, new StringDecorated(filterText));
+        canvas.FillLine(0, filterText);
     }
 
     private void DrawItems(Rectangle area, PSHostUserInterface hostUI)
@@ -118,7 +123,7 @@ internal class ListView
             };
 
             var text = itemIndex < listItems.Count ? listItems[itemIndex].Label : string.Empty;
-            canvas.FillLine(lineIndex, new StringDecorated($"{backgroundColor}{text}"));
+            canvas.FillLine(lineIndex, $"{backgroundColor}{text}");
         }
     }
 
