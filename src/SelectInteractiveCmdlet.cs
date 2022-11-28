@@ -92,7 +92,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
     private ListItem CreateListItem(PSObject? inputItem, int itemIndex)
     {
         var rawText = GetItemText(inputItem, itemIndex);
-        var text = rawText.RemoveControlCharacters();
+        var text = rawText.RemoveEscapeSequencesAndControlCharacters();
         return new ListItem(text, inputItem);
     }
 
