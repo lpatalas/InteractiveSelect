@@ -12,6 +12,9 @@ internal class Canvas
     private readonly StringBuilder buffer;
     private readonly PSHostUserInterface hostUI;
 
+    public int Width => area.GetWidth();
+    public int Height => area.GetHeight();
+
     public Canvas(PSHostUserInterface hostUI, Rectangle area)
     {
         this.area = area;

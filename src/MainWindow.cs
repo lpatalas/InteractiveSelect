@@ -68,7 +68,8 @@ internal class MainWindow
             (mainArea.Left + mainArea.Right) / 2,
             mainArea.Bottom);
 
-        listPane.Draw(listPaneArea, hostUI);
+        var listPaneCanvas = new Canvas(hostUI, listPaneArea);
+        listPane.Draw(listPaneCanvas);
 
         var previewPaneArea = new Rectangle(
             listPaneArea.Right,
@@ -76,7 +77,8 @@ internal class MainWindow
             mainArea.Right,
             mainArea.Bottom);
 
-        previewPane.Draw(previewPaneArea, hostUI);
+        var previewPaneCanvas = new Canvas(hostUI, previewPaneArea);
+        previewPane.Draw(previewPaneCanvas);
     }
 
     private void ClearConsole(PSHostUserInterface hostUI, Coordinates topLeft)

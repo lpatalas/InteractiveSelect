@@ -25,10 +25,9 @@ internal class PreviewPane
         return false;
     }
 
-    public void Draw(Rectangle area, PSHostUserInterface hostUI)
+    public void Draw(Canvas canvas)
     {
-        var canvas = new Canvas(hostUI, area);
-        for (int y = 0; y < area.GetHeight(); y++)
+        for (int y = 0; y < canvas.Height; y++)
         {
             canvas.FillLine(y, colors[currentColor]);
             currentColor = (currentColor + 1) % colors.Count;

@@ -73,15 +73,14 @@ internal class ListPane
         return false;
     }
 
-    public void Draw(Rectangle area, PSHostUserInterface hostUI)
+    public void Draw(Canvas canvas)
     {
-        DrawFilter(new Rectangle(area.Left, area.Top, area.Right, area.Top + 1), hostUI);
-        DrawItems(new Rectangle(area.Left, area.Top + 1, area.Right, area.Bottom), hostUI);
+        DrawFilter(canvas);
+        DrawItems(canvas);
     }
 
-    private void DrawFilter(Rectangle area, PSHostUserInterface hostUI)
+    private void DrawFilter(Canvas canvas)
     {
-        var canvas = new Canvas(hostUI, area);
         var filterText = listItems.Filter switch
         {
             null or "" => $"{PSStyle.Instance.Foreground.BrightBlack}(no filter)",
@@ -91,10 +90,8 @@ internal class ListPane
         canvas.FillLine(0, filterText);
     }
 
-    private void DrawItems(Rectangle area, PSHostUserInterface hostUI)
+    private void DrawItems(Canvas canvas)
     {
-        var canvas = new Canvas(hostUI, area);
-
         for (int lineIndex = 0; lineIndex < listItems.PageSize; lineIndex++)
         {
             int itemIndex = lineIndex + listItems.ScrollOffset;
@@ -105,7 +102,7 @@ internal class ListPane
             };
 
             var text = itemIndex < listItems.Count ? listItems[itemIndex].Label : string.Empty;
-            canvas.FillLine(lineIndex, $"{backgroundColor}{text}");
+            canvas.FillLine(lineIndex + 1, $"{backgroundColor}{text}");
         }
     }
 }
