@@ -1,4 +1,5 @@
-﻿using System.Management.Automation;
+﻿using System;
+using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Management.Automation.Internal;
 using System.Text;
@@ -7,8 +8,6 @@ namespace InteractiveSelect;
 
 internal class Canvas
 {
-    private static readonly StringDecorated emptyStringDecorated = new StringDecorated(string.Empty);
-
     private readonly Rectangle area;
     private readonly StringBuilder buffer;
     private readonly PSHostUserInterface hostUI;
