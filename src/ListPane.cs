@@ -10,6 +10,8 @@ internal class ListPane
 {
     private readonly CollectionView<ListItem> listItems;
 
+    public PSObject? HighlightedObject => listItems.HighlightedItem?.Value;
+
     public ListPane(IReadOnlyList<ListItem> listItems, int height)
     {
         var listPageSize = height - 1; // -1 to make space for filter line

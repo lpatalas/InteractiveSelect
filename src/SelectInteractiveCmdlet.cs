@@ -17,6 +17,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
     [Parameter]
     public PSPropertyExpression? ItemText { get; set; }
 
+    [Parameter]
+    public PSPropertyExpression? ItemPreview { get; set; }
+
     [Parameter(
         Mandatory = true,
         ParameterSetName = ParameterSets.InputFromPipeline,
@@ -66,7 +69,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
             try
             {
                 Console.CursorVisible = false;
-                var mainWindow = new MainWindow(listItems, height: 10);
+                var mainWindow = new MainWindow(listItems, height: 10, ItemPreview);
 
                 var result = mainWindow.RunMainLoop(Host.UI);
                 WriteObject(result.SelectedItems, enumerateCollection: true);

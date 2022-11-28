@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Host;
+using Microsoft.PowerShell.Commands;
 
 namespace InteractiveSelect;
 
@@ -14,17 +15,22 @@ internal class MainWindow
     private readonly ListPane listPane;
     private readonly PreviewPane previewPane;
 
-    public MainWindow(IReadOnlyList<ListItem> listItems, int height)
+    public MainWindow(
+        IReadOnlyList<ListItem> listItems,
+        int height,
+        PSPropertyExpression? previewExpression)
     {
         this.height = height;
 
         listPane = new ListPane(listItems, height);
-        previewPane = new PreviewPane();
+        previewPane = new PreviewPane(previewExpression);
     }
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
     {
         var initialCursorPosition = hostUI.RawUI.CursorPosition;
+
+        previewPane.SetPreviewedObject(listPane.HighlightedObject);
 
         var selectedObjects = Enumerable.Empty<PSObject?>();
         var isExiting = false;
@@ -34,7 +40,11 @@ internal class MainWindow
 
             var pressedKey = Console.ReadKey(intercept: true);
             var keyHandled = listPane.HandleKey(pressedKey);
-            if (!keyHandled)
+            if (keyHandled)
+            {
+                previewPane.SetPreviewedObject(listPane.HighlightedObject);
+            }
+            else
             {
                 switch (pressedKey.Key)
                 {
