@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Management.Automation;
-using System.Runtime.InteropServices;
 using Microsoft.PowerShell.Commands;
 
 namespace InteractiveSelect;
@@ -92,13 +91,14 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
     private ListItem CreateListItem(PSObject? inputItem, int itemIndex)
     {
-        var label = GetLabelForItem(inputItem, itemIndex);
-        return new ListItem(label, inputItem);
+        var rawText = GetItemText(inputItem, itemIndex);
+        var text = rawText.RemoveControlCharacters();
+        return new ListItem(text, inputItem);
     }
 
-    private string GetLabelForItem(PSObject? item, int itemIndex)
+    private string GetItemText(PSObject? item, int itemIndex)
     {
-        string GetDefaultLabel()
+        string GetDefaultText()
             => item?.ToString() ?? $"(null #{itemIndex})";
 
         if (ItemText is not null)
@@ -123,6 +123,6 @@ public class SelectInteractiveCmdlet : PSCmdlet
             }
         }
 
-        return GetDefaultLabel();
+        return GetDefaultText();
     }
 }
