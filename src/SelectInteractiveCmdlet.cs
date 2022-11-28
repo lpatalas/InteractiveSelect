@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Management.Automation;
-using System.Management.Automation.Internal;
+using Microsoft.PowerShell.Commands;
 
 namespace InteractiveSelect;
 
@@ -15,7 +15,7 @@ file static class ParameterSets
 public class SelectInteractiveCmdlet : PSCmdlet
 {
     [Parameter]
-    public ScriptBlock? FormatLabel { get; set; }
+    public PSPropertyExpression? ItemText { get; set; }
 
     [Parameter(
         Mandatory = true,
@@ -91,34 +91,33 @@ public class SelectInteractiveCmdlet : PSCmdlet
         return new ListItem(label, inputItem);
     }
 
-    private string GetLabelForItem(object? item, int itemIndex)
+    private string GetLabelForItem(PSObject? item, int itemIndex)
     {
         string GetDefaultLabel()
-            => item?.ToString() ?? string.Empty;
+            => item?.ToString() ?? $"(null #{itemIndex})";
 
-        if (FormatLabel is not null)
+        if (ItemText is not null)
         {
-            try
+            var result = ItemText.GetValues(item);
+            if (result is [var firstResult, ..])
             {
-                var result = FormatLabel.Invoke(item);
-                if (result.Count > 0 && result[0] is not null)
-                    return result[0].ToString();
-                else
-                    return GetDefaultLabel();
-            }
-            catch (RuntimeException ex)
-            {
-                WriteError(new ErrorRecord(
-                    new ItemCallbackScriptException(nameof(FormatLabel), itemIndex, ex),
-                    "SelectInteractive_FormatLabel_RuntimeException",
-                    ErrorCategory.InvalidOperation,
-                    item));
-                return GetDefaultLabel();
+                if (firstResult.Result is not null)
+                {
+                    var labelText = firstResult.Result.ToString();
+                    if (!string.IsNullOrEmpty(labelText))
+                        return labelText;
+                }
+                else if (firstResult.Exception is not null)
+                {
+                    WriteError(new ErrorRecord(
+                        new ItemCallbackScriptException(nameof(ItemText), itemIndex, firstResult.Exception),
+                        "SelectInteractive_FormatLabel_RuntimeException",
+                        ErrorCategory.InvalidOperation,
+                        item));
+                }
             }
         }
-        else
-        {
-            return GetDefaultLabel();
-        }
+
+        return GetDefaultLabel();
     }
 }
