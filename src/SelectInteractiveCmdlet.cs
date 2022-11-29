@@ -15,10 +15,10 @@ file static class ParameterSets
 public class SelectInteractiveCmdlet : PSCmdlet
 {
     [Parameter]
-    public PSPropertyExpression? ItemText { get; set; }
+    public PSPropertyExpression? Property { get; set; }
 
     [Parameter]
-    public PSPropertyExpression? ItemPreview { get; set; }
+    public PSPropertyExpression? Preview { get; set; }
 
     [Parameter(
         Mandatory = true,
@@ -69,7 +69,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
             try
             {
                 Console.CursorVisible = false;
-                var mainWindow = new MainWindow(listItems, height: 10, ItemPreview);
+                var mainWindow = new MainWindow(listItems, height: 10, Preview);
 
                 var result = mainWindow.RunMainLoop(Host.UI);
                 WriteObject(result.SelectedItems, enumerateCollection: true);
@@ -101,7 +101,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
         var rawText = GetItemText(inputItem, itemIndex);
         var plainText = new ValueStringDecorated(rawText)
             .ToString(OutputRendering.PlainText)
-            .RemoveControlCharacters();
+            .RemoveControlCharactersExceptEsc();
         return new ListItem(plainText, inputItem);
     }
 
@@ -110,9 +110,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
         string GetDefaultText()
             => item?.ToString() ?? $"(null #{itemIndex})";
 
-        if (ItemText is not null)
+        if (Property is not null)
         {
-            var result = ItemText.GetValues(item);
+            var result = Property.GetValues(item);
             if (result is [var firstResult, ..])
             {
                 if (firstResult.Result is not null)
@@ -124,7 +124,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
                 else if (firstResult.Exception is not null)
                 {
                     WriteError(new ErrorRecord(
-                        new ItemCallbackScriptException(nameof(ItemText), itemIndex, firstResult.Exception),
+                        new ItemCallbackScriptException(nameof(Property), itemIndex, firstResult.Exception),
                         "SelectInteractive_FormatLabel_RuntimeException",
                         ErrorCategory.InvalidOperation,
                         item));

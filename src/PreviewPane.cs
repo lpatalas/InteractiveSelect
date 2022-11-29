@@ -9,11 +9,11 @@ namespace InteractiveSelect;
 internal class PreviewPane
 {
     private PSObject? previewedObject;
-    private readonly PSPropertyExpression? propertyExpression;
+    private readonly PSPropertyExpression? previewExpression;
 
-    public PreviewPane(PSPropertyExpression? propertyExpression)
+    public PreviewPane(PSPropertyExpression? previewExpression)
     {
-        this.propertyExpression = propertyExpression;
+        this.previewExpression = previewExpression;
     }
 
     public void SetPreviewedObject(PSObject? previewedObject)
@@ -53,20 +53,41 @@ internal class PreviewPane
 
     private IEnumerable<string> GetPreviewLines(PSObject obj)
     {
-        if (propertyExpression == null)
+        if (previewExpression == null)
             yield break;
 
-        List<PSPropertyExpressionResult> results = propertyExpression.GetValues(obj);
+        List<PSPropertyExpressionResult> results = previewExpression.GetValues(obj);
         if (results.Count > 0)
         {
             foreach (var result in results)
             {
-                var line = result?.Result?.ToString() ?? string.Empty;
-                var splitLines = line.Split(Environment.NewLine);
-                foreach (var splitLine in splitLines)
+                var psObjectResult = (result.Result is not null)
+                    ? PSObject.AsPSObject(result.Result)
+                    : null;
+
+                IEnumerable<string?> subResults;
+
+                if (psObjectResult?.BaseObject is IEnumerable<object> collection)
+                    subResults = collection.Select(x => x?.ToString());
+                else
+                    subResults = Enumerable.Repeat(result.Result?.ToString(), 1);
+
+                foreach (var subResult in subResults)
                 {
-                    yield return splitLine.RemoveControlCharacters();
+                    if (subResult is null)
+                    {
+                        yield return string.Empty;
+                    }
+                    else
+                    {
+                        var splitLines = subResult.Split('\n');
+                        foreach (var splitLine in splitLines)
+                        {
+                            yield return splitLine.RemoveControlCharactersExceptEsc();
+                        }
+                    }
                 }
+                
             }
         }
     }
