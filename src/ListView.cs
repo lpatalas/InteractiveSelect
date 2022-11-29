@@ -95,10 +95,10 @@ internal class ListView<T>
     public void HighlightNextItem()
         => SetHighlightedIndex(HighlightedIndex + 1);
 
-    public void HighlightPreviousPage()
+    public void HighlightItemPageUp()
         => SetHighlightedIndex(HighlightedIndex - PageSize + 1);
 
-    public void HighlightNextPage()
+    public void HighlightItemPageDown()
         => SetHighlightedIndex(HighlightedIndex + PageSize - 1);
 
     public void HighlightFirstItem()

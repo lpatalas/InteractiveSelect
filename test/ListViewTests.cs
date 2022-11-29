@@ -266,6 +266,186 @@ public class ListViewTests
             }
         };
 
+    [Theory]
+    [MemberData(nameof(HighlightItemPageDownScenarios))]
+    public void HighlightItemPageDownTests(Scenario testCase)
+        => RunScenario(testCase);
+
+    public static TheoryData<Scenario> HighlightItemPageDownScenarios =>
+        new()
+        {
+            new Scenario("Should move highlight to last item on the page when the first one is highlighted")
+            {
+                Before = """
+                    > ItemA |
+                      ItemB |
+                      ItemC |
+                      ItemD
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageDown(),
+
+                After = """
+                      ItemA |
+                      ItemB |
+                    > ItemC |
+                      ItemD
+                    """,
+            },
+            new Scenario("Scroll down when the new item is outside the current page")
+            {
+                Before = """
+                      ItemA |
+                    > ItemB |
+                      ItemC |
+                      ItemD
+                      ItemE
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageDown(),
+
+                After = """
+                      ItemA
+                      ItemB |
+                      ItemC |
+                    > ItemD |
+                      ItemE
+                    """,
+            },
+
+            new Scenario("Should highlight last item when list is already scrolled to the end")
+            {
+                Before = """
+                      ItemA
+                      ItemB |
+                    > ItemC |
+                      ItemD |
+                      ItemE |
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageDown(),
+
+                After = """
+                      ItemA
+                      ItemB |
+                      ItemC |
+                      ItemD |
+                    > ItemE |
+                    """,
+            },
+
+            new Scenario("Do nothing when the last item is already selected")
+            {
+                Before = """
+                      ItemA
+                      ItemB |
+                    > ItemC |
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageDown(),
+
+                After = """
+                      ItemA
+                      ItemB |
+                    > ItemC |
+                    """,
+            }
+        };
+
+    [Theory]
+    [MemberData(nameof(HighlightItemPageUpScenarios))]
+    public void HighlightItemPageUpTests(Scenario testCase)
+        => RunScenario(testCase);
+
+    public static TheoryData<Scenario> HighlightItemPageUpScenarios =>
+        new()
+        {
+            new Scenario("Should move highlight to the first item on the page when the first one is highlighted")
+            {
+                Before = """
+                      ItemA |
+                      ItemB |
+                    > ItemC |
+                      ItemD
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageUp(),
+
+                After = """
+                    > ItemA |
+                      ItemB |
+                      ItemC |
+                      ItemD
+                    """,
+            },
+            new Scenario("Scroll up when the new item is outside the current page")
+            {
+                Before = """
+                      ItemA
+                      ItemB
+                      ItemC |
+                    > ItemD |
+                      ItemE |
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageUp(),
+
+                After = """
+                      ItemA
+                    > ItemB |
+                      ItemC |
+                      ItemD |
+                      ItemE
+                    """,
+            },
+
+            new Scenario("Should highlight first item when list is already scrolled to the end")
+            {
+                Before = """
+                      ItemA |
+                      ItemB |
+                    > ItemC |
+                      ItemD |
+                      ItemE
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageUp(),
+
+                After = """
+                    > ItemA |
+                      ItemB |
+                      ItemC |
+                      ItemD |
+                      ItemE
+                    """,
+            },
+
+            new Scenario("Do nothing when the first item is already selected")
+            {
+                Before = """
+                    > ItemA |
+                      ItemB |
+                      ItemC
+                    """,
+
+                Action = listView =>
+                    listView.HighlightItemPageUp(),
+
+                After = """
+                    > ItemA |
+                      ItemB |
+                      ItemC
+                    """,
+            }
+        };
+
     public record Scenario(string Name)
     {
         internal string Before { get; init; } = default!;
