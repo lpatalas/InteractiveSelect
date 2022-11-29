@@ -6,6 +6,17 @@ namespace InteractiveSelect.Tests;
 
 public class ListViewTests
 {
+    // Test cases use ASCII art to define ListView visually, e.g.
+    //
+    //    ItemA
+    //    ItemB |   <-- Vertical bars specify current page. First bar from top
+    //  > ItemC |       determines scroll offset (1) and the numbers of bars
+    //    ItemD |       specifies page size (3).
+    //    ItemE
+    //
+    //  - ">" character in the first column marks currently highlighted item.
+    //  - The rest of non-whitespace characters are item value.
+
     [Theory]
     [MemberData(nameof(HighlightNextItemScenarios))]
     public void HighlightNextItemTests(Scenario testCase)
