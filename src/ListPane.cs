@@ -8,14 +8,14 @@ namespace InteractiveSelect;
 
 internal class ListPane
 {
-    private readonly CollectionView<ListItem> listItems;
+    private readonly ListView<ListItem> listItems;
 
     public PSObject? HighlightedObject => listItems.HighlightedItem?.Value;
 
     public ListPane(IReadOnlyList<ListItem> listItems, int height)
     {
         var listPageSize = height - 1; // -1 to make space for filter line
-        this.listItems = new CollectionView<ListItem>(
+        this.listItems = new ListView<ListItem>(
             listItems,
             listPageSize,
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase));
