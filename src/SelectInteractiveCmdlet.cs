@@ -63,8 +63,20 @@ public class SelectInteractiveCmdlet : PSCmdlet
         
         if (listItems.Count > 0)
         {
-            // CursorVisible is only available on Windows
-            bool? initialCursorVisibility = OperatingSystem.IsWindows() ? Console.CursorVisible : null;
+            bool didHideCursor = false;
+
+            if (Host.UI.SupportsVirtualTerminal)
+            {
+                WriteDebug("Hiding cursor using escape sequence");
+                Host.UI.Write(AnsiControlSequences.HideCursor);
+                didHideCursor = true;
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                WriteDebug("Hiding cursor using Console.CursorVisible");
+                Console.CursorVisible = false;
+                didHideCursor = true;
+            }
 
             try
             {
@@ -76,8 +88,13 @@ public class SelectInteractiveCmdlet : PSCmdlet
             }
             finally
             {
-                if (initialCursorVisibility.HasValue)
-                    Console.CursorVisible = initialCursorVisibility.Value;
+                if (didHideCursor)
+                {
+                    if (Host.UI.SupportsVirtualTerminal)
+                        Host.UI.Write(AnsiControlSequences.ShowCursor);
+                    else if (OperatingSystem.IsWindows())
+                        Console.CursorVisible = true;
+                }
             }
         }
         else
