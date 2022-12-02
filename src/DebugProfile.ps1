@@ -1,6 +1,13 @@
 ﻿$DebugPreference = 'Continue'
 Import-Module "$PSScriptRoot\InteractiveSelect.dll"
 
+$dir = Get-Item $pwd
+while ($dir.Parent -and (-not (Test-Path (Join-Path $dir "global.json")))) {
+    $dir = $dir.Parent
+}
+
+Set-Location $dir
+
 function GenerateArray {
     param($Count)
 
