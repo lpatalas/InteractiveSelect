@@ -20,7 +20,7 @@ internal class MainWindow
     private ActivePane activePane = ActivePane.List;
     private readonly int height;
     private readonly ListPane listPane;
-    private readonly PreviewPane previewPane;
+    private readonly PreviewPane? previewPane;
 
     public MainWindow(
         IReadOnlyList<ListItem> listItems,
@@ -29,15 +29,23 @@ internal class MainWindow
     {
         this.height = height;
 
-        previewPane = new PreviewPane(previewExpression, height);
-        listPane = new ListPane(listItems, height, previewPane.SetPreviewedObject);
+        if (previewExpression != null)
+            previewPane = new PreviewPane(previewExpression, height);
+
+        Action<PSObject?> highlightedItemChangedCallback = previewPane switch
+        {
+            { } => previewPane.SetPreviewedObject,
+            null => _ => { }
+        };
+
+        listPane = new ListPane(listItems, height, highlightedItemChangedCallback);
     }
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
     {
         var initialCursorPosition = hostUI.RawUI.CursorPosition;
 
-        previewPane.SetPreviewedObject(listPane.HighlightedObject);
+        previewPane?.SetPreviewedObject(listPane.HighlightedObject);
 
         var selectedObjects = Enumerable.Empty<PSObject?>();
         var isExiting = false;
@@ -48,11 +56,7 @@ internal class MainWindow
             var pressedKey = Console.ReadKey(intercept: true);
             var keyHandled = HandleKey(pressedKey);
 
-            if (keyHandled)
-            {
-                previewPane.SetPreviewedObject(listPane.HighlightedObject);
-            }
-            else
+            if (!keyHandled)
             {
                 switch (pressedKey.Key)
                 {
@@ -74,7 +78,7 @@ internal class MainWindow
 
     private bool HandleKey(ConsoleKeyInfo keyInfo)
     {
-        if (keyInfo.Key == ConsoleKey.Tab)
+        if (keyInfo.Key == ConsoleKey.Tab && previewPane != null)
         {
             if (activePane == ActivePane.List)
                 activePane = ActivePane.Preview;
@@ -87,7 +91,7 @@ internal class MainWindow
         if (activePane == ActivePane.List)
             return listPane.HandleKey(keyInfo);
         else
-            return previewPane.HandleKey(keyInfo);
+            return previewPane?.HandleKey(keyInfo) ?? false;
     }
 
     private void Draw(PSHostUserInterface hostUI, Coordinates topLeft)
@@ -98,35 +102,44 @@ internal class MainWindow
             hostUI.RawUI.BufferSize.Width,
             topLeft.Y + height);
 
+        var listPaneRight = previewPane switch
+        {
+            { } => (mainArea.Left + mainArea.Right) / 2,
+            null => mainArea.Right
+        };
+
         var listPaneArea = new Rectangle(
             mainArea.Left,
             mainArea.Top,
-            (mainArea.Left + mainArea.Right) / 2,
+            listPaneRight,
             mainArea.Bottom);
 
         var listPaneCanvas = new Canvas(hostUI, listPaneArea);
         listPane.Draw(listPaneCanvas, activePane == ActivePane.List);
 
-        var previewPaneArea = new Rectangle(
-            listPaneArea.Right + 1,
-            mainArea.Top,
-            mainArea.Right,
-            mainArea.Bottom);
+        if (previewPane != null)
+        {
+            var previewPaneArea = new Rectangle(
+                listPaneArea.Right + 1,
+                mainArea.Top,
+                mainArea.Right,
+                mainArea.Bottom);
 
-        var previewPaneCanvas = new Canvas(hostUI, previewPaneArea);
-        previewPane.Draw(previewPaneCanvas, activePane == ActivePane.Preview);
+            var previewPaneCanvas = new Canvas(hostUI, previewPaneArea);
+            previewPane?.Draw(previewPaneCanvas, activePane == ActivePane.Preview);
 
-        var separatorArea = new Rectangle(
-            listPaneArea.Right,
-            mainArea.Top,
-            previewPaneArea.Left,
-            mainArea.Bottom);
+            var separatorArea = new Rectangle(
+                listPaneArea.Right,
+                mainArea.Top,
+                previewPaneArea.Left,
+                mainArea.Bottom);
 
-        var separatorText = ConsoleString.CreateStyled(
-            PSStyle.Instance.Foreground.BrightBlack + "\u2502");
-        var separatorCanvas = new Canvas(hostUI, separatorArea);
-        for (int i = 0; i < separatorArea.GetHeight(); i++)
-            separatorCanvas.FillLine(i, separatorText);
+            var separatorText = ConsoleString.CreateStyled(
+                PSStyle.Instance.Foreground.BrightBlack + "\u2502");
+            var separatorCanvas = new Canvas(hostUI, separatorArea);
+            for (int i = 0; i < separatorArea.GetHeight(); i++)
+                separatorCanvas.FillLine(i, separatorText);
+        }
     }
 
     private void ClearConsole(PSHostUserInterface hostUI, Coordinates topLeft)
