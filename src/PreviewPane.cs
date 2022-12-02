@@ -8,16 +8,14 @@ namespace InteractiveSelect;
 
 internal class PreviewPane
 {
-    private IReadOnlyList<ConsoleString> previewLines = Array.Empty<ConsoleString>();
     private PSObject? previewedObject;
     private readonly PSPropertyExpression? previewExpression;
-    private int scrollOffset;
-    private readonly int pageSize;
+    private readonly ScrollView<ConsoleString> scrollView;
 
     public PreviewPane(PSPropertyExpression? previewExpression, int height)
     {
         this.previewExpression = previewExpression;
-        this.pageSize = height - 1; // Reserve space for header
+        this.scrollView = new ScrollView<ConsoleString>(pageSize: height - 1);
     }
 
     public void SetPreviewedObject(PSObject? previewedObject)
@@ -26,12 +24,12 @@ internal class PreviewPane
             return;
 
         this.previewedObject = previewedObject;
-        if (previewedObject != null)
-            previewLines = GetPreviewLines(previewedObject).ToList();
-        else
-            previewLines = Array.Empty<ConsoleString>();
 
-        scrollOffset = 0;
+        IReadOnlyList<ConsoleString> previewLines = previewedObject != null
+            ? GetPreviewLines(previewedObject).ToList()
+            : Array.Empty<ConsoleString>();
+
+        scrollView.SetItems(previewLines);
     }
 
     public bool HandleKey(ConsoleKeyInfo keyInfo)
@@ -39,26 +37,22 @@ internal class PreviewPane
         switch (keyInfo.Key)
         {
             case ConsoleKey.DownArrow:
-                scrollOffset = Math.Min(
-                    scrollOffset + 1,
-                    Math.Max(0, previewLines.Count - pageSize));
+                scrollView.ScrollDown();
                 return true;
             case ConsoleKey.UpArrow:
-                scrollOffset = Math.Max(0, scrollOffset - 1);
+                scrollView.ScrollUp();
                 return true;
             case ConsoleKey.PageDown:
-                scrollOffset = Math.Min(
-                    scrollOffset + pageSize,
-                    Math.Max(0, previewLines.Count - pageSize));
+                scrollView.ScrollPageDown();
                 return true;
             case ConsoleKey.PageUp:
-                scrollOffset = Math.Max(0, scrollOffset - pageSize);
+                scrollView.ScrollPageUp();
                 return true;
             case ConsoleKey.Home:
-                scrollOffset = 0;
+                scrollView.ScrollToTheTop();
                 return true;
             case ConsoleKey.End:
-                scrollOffset = Math.Max(0, previewLines.Count - pageSize);
+                scrollView.ScrollToTheBottom();
                 return true;
         }
 
@@ -74,12 +68,11 @@ internal class PreviewPane
 
     private void DrawScrollView(Canvas canvas)
     {
-        int visibleLineCount = Math.Min(previewLines.Count, pageSize);
-
+        var page = scrollView.GetCurrentPage();
         int lineIndex = 0;
 
-        for (; lineIndex < visibleLineCount; lineIndex++)
-            canvas.FillLine(lineIndex, previewLines[lineIndex + scrollOffset]);
+        for (; lineIndex < page.Count; lineIndex++)
+            canvas.FillLine(lineIndex, page[lineIndex]);
 
         for (; lineIndex < canvas.Height; lineIndex++)
             canvas.FillLine(lineIndex, ConsoleString.Empty);
