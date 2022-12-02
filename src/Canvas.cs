@@ -22,6 +22,29 @@ internal class Canvas
         buffer = new StringBuilder(capacity: area.GetWidth() * 2);
     }
 
+    public Canvas GetSubArea(int x, int y, int width, int height)
+    {
+        var subArea = new Rectangle(
+            left: area.Left + x,
+            top: area.Top + y,
+            right: area.Left + x + width,
+            bottom: area.Top + y + height);
+
+        return new Canvas(hostUI, subArea);
+    }
+
+    public void DrawHeader(bool isActive, ConsoleString text)
+    {
+        var style = isActive switch
+        {
+            true => PSStyle.Instance.Foreground.BrightWhite + PSStyle.Instance.Background.Blue,
+            false => PSStyle.Instance.Foreground.White + PSStyle.Instance.Background.BrightBlack
+        };
+
+        var styledText = ConsoleString.Concat(ConsoleString.CreateStyled(style), text);
+        FillLine(0, styledText);
+    }
+
     public void FillLine(int lineIndex, ConsoleString text)
     {
         if (lineIndex >= area.GetHeight())

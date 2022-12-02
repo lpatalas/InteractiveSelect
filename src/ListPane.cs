@@ -81,21 +81,24 @@ internal class ListPane
         return false;
     }
 
-    public void Draw(Canvas canvas)
+    public void Draw(Canvas canvas, bool isActive)
     {
-        DrawFilter(canvas);
+        DrawFilter(canvas, isActive);
         DrawItems(canvas);
     }
 
-    private void DrawFilter(Canvas canvas)
+    private void DrawFilter(Canvas canvas, bool isActive)
     {
+        var totalCount = listItems.OriginalItems.Count;
+        var filteredCount = listItems.Count;
+
         var filterText = listItems.Filter switch
         {
-            null or "" => $"{PSStyle.Instance.Foreground.BrightBlack}(no filter)",
-            _ => $"{PSStyle.Instance.Foreground.BrightBlue}> {listItems.Filter}"
+            null or "" => $"{totalCount} items",
+            _ => $"{filteredCount}/{totalCount}> {listItems.Filter}"
         };
 
-        canvas.FillLine(0, ConsoleString.CreateStyled(filterText));
+        canvas.DrawHeader(isActive, ConsoleString.CreatePlainText(filterText));
     }
 
     private void DrawItems(Canvas canvas)

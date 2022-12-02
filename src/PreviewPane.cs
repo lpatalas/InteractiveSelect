@@ -14,10 +14,10 @@ internal class PreviewPane
     private int scrollOffset;
     private readonly int pageSize;
 
-    public PreviewPane(PSPropertyExpression? previewExpression, int pageSize)
+    public PreviewPane(PSPropertyExpression? previewExpression, int height)
     {
         this.previewExpression = previewExpression;
-        this.pageSize = pageSize;
+        this.pageSize = height - 1; // Reserve space for header
     }
 
     public void SetPreviewedObject(PSObject? previewedObject)
@@ -59,23 +59,24 @@ internal class PreviewPane
         return false;
     }
 
-    public void Draw(Canvas canvas)
+    public void Draw(Canvas canvas, bool isActive)
     {
-        if (previewedObject != null)
-        {
-            int i = 0;
-            int visibleLineCount = Math.Min(previewLines.Count, canvas.Height);
+        canvas.DrawHeader(isActive, ConsoleString.CreatePlainText("Preview"));
+        var scrollViewCanvas = canvas.GetSubArea(0, 1, canvas.Width, canvas.Height - 1);
+        DrawScrollView(scrollViewCanvas);
+    }
 
-            for (; i < visibleLineCount; i++)
-                canvas.FillLine(i, previewLines[i + scrollOffset]);
+    private void DrawScrollView(Canvas canvas)
+    {
+        int visibleLineCount = Math.Min(previewLines.Count, pageSize);
 
-            for (; i < canvas.Height; i++)
-                canvas.FillLine(i, ConsoleString.Empty);
-        }
-        else
-        {
-            canvas.Clear();
-        }
+        int lineIndex = 0;
+
+        for (; lineIndex < visibleLineCount; lineIndex++)
+            canvas.FillLine(lineIndex, previewLines[lineIndex + scrollOffset]);
+
+        for (; lineIndex < canvas.Height; lineIndex++)
+            canvas.FillLine(lineIndex, ConsoleString.Empty);
     }
 
     private IEnumerable<ConsoleString> GetPreviewLines(PSObject obj)

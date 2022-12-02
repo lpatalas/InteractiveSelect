@@ -105,7 +105,7 @@ internal class MainWindow
             mainArea.Bottom);
 
         var listPaneCanvas = new Canvas(hostUI, listPaneArea);
-        listPane.Draw(listPaneCanvas);
+        listPane.Draw(listPaneCanvas, activePane == ActivePane.List);
 
         var previewPaneArea = new Rectangle(
             listPaneArea.Right + 1,
@@ -114,7 +114,7 @@ internal class MainWindow
             mainArea.Bottom);
 
         var previewPaneCanvas = new Canvas(hostUI, previewPaneArea);
-        previewPane.Draw(previewPaneCanvas);
+        previewPane.Draw(previewPaneCanvas, activePane == ActivePane.Preview);
 
         var separatorArea = new Rectangle(
             listPaneArea.Right,
