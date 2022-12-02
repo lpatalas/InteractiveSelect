@@ -54,6 +54,12 @@ internal class PreviewPane
             case ConsoleKey.PageUp:
                 scrollOffset = Math.Max(0, scrollOffset - pageSize);
                 return true;
+            case ConsoleKey.Home:
+                scrollOffset = 0;
+                return true;
+            case ConsoleKey.End:
+                scrollOffset = Math.Max(0, previewLines.Count - pageSize);
+                return true;
         }
 
         return false;
