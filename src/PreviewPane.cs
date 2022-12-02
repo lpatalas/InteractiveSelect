@@ -83,7 +83,8 @@ internal class PreviewPane
                         var splitLines = subResult.Split('\n');
                         foreach (var splitLine in splitLines)
                         {
-                            yield return splitLine.RemoveControlCharactersExceptEsc();
+                            // TODO: Keep SGR sequences
+                            yield return splitLine.RemoveControlSequences();
                         }
                     }
                 }
