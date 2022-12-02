@@ -20,6 +20,7 @@ internal class MainWindow
     private ActivePane activePane = ActivePane.List;
     private readonly int height;
     private readonly ListPane listPane;
+    private readonly int maxItemLength;
     private readonly PreviewPane? previewPane;
 
     public MainWindow(
@@ -39,6 +40,7 @@ internal class MainWindow
         };
 
         listPane = new ListPane(listItems, height, highlightedItemChangedCallback);
+        maxItemLength = listItems.Max(item => item.Label.ContentLength);
     }
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
@@ -107,6 +109,8 @@ internal class MainWindow
             { } => (mainArea.Left + mainArea.Right) / 2,
             null => mainArea.Right
         };
+
+        listPaneRight = Math.Min(listPaneRight, mainArea.Left + maxItemLength);
 
         var listPaneArea = new Rectangle(
             mainArea.Left,

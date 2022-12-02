@@ -35,7 +35,8 @@ public class SelectInteractiveCmdlet : PSCmdlet
     public PSObject?[]? Items { get; set; }
 
     [Parameter]
-    public int? MaxWidth { get; set; }
+    [ValidateRange(2, int.MaxValue)]
+    public int? Height { get; set; }
 
     private bool HasPipelineInput
         => string.Equals(ParameterSetName, ParameterSets.InputFromPipeline, StringComparison.Ordinal);
@@ -81,7 +82,10 @@ public class SelectInteractiveCmdlet : PSCmdlet
             try
             {
                 Console.CursorVisible = false;
-                var mainWindow = new MainWindow(listItems, height: 10, Preview);
+                var mainWindow = new MainWindow(
+                    listItems,
+                    Height.GetValueOrDefault(10),
+                    Preview);
 
                 var result = mainWindow.RunMainLoop(Host.UI);
                 WriteObject(result.SelectedItems, enumerateCollection: true);
