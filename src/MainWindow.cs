@@ -82,13 +82,25 @@ internal class MainWindow
         listPane.Draw(listPaneCanvas);
 
         var previewPaneArea = new Rectangle(
-            listPaneArea.Right,
+            listPaneArea.Right + 1,
             mainArea.Top,
             mainArea.Right,
             mainArea.Bottom);
 
         var previewPaneCanvas = new Canvas(hostUI, previewPaneArea);
         previewPane.Draw(previewPaneCanvas);
+
+        var separatorArea = new Rectangle(
+            listPaneArea.Right,
+            mainArea.Top,
+            previewPaneArea.Left,
+            mainArea.Bottom);
+
+        var separatorText = ConsoleString.CreateStyled(
+            PSStyle.Instance.Foreground.BrightBlack + "\u2502");
+        var separatorCanvas = new Canvas(hostUI, separatorArea);
+        for (int i = 0; i < separatorArea.GetHeight(); i++)
+            separatorCanvas.FillLine(i, separatorText);
     }
 
     private void ClearConsole(PSHostUserInterface hostUI, Coordinates topLeft)
