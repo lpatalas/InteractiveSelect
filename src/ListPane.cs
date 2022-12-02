@@ -64,7 +64,7 @@ internal class ListPane
                     listItems.Filter = listItems.Filter.Substring(0, listItems.Filter.Length - 1);
                 return true;
             default:
-                if (char.IsLetter(keyInfo.KeyChar))
+                if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
                 {
                     listItems.Filter = (listItems.Filter ?? "") + keyInfo.KeyChar;
                     return true;
