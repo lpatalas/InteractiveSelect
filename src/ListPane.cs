@@ -94,7 +94,7 @@ internal class ListPane
 
         var filterText = listItems.Filter switch
         {
-            null or "" => $"{totalCount} items",
+            null or "" => $"{filteredCount}/{totalCount}",
             _ => $"{filteredCount}/{totalCount}> {listItems.Filter}"
         };
 

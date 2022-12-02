@@ -61,7 +61,11 @@ internal class PreviewPane
 
     public void Draw(Canvas canvas, bool isActive)
     {
-        canvas.DrawHeader(isActive, ConsoleString.CreatePlainText("Preview"));
+        var currentPage = scrollView.GetCurrentPage();
+        var headerText = $"{currentPage.FirstIndex + 1}-{currentPage.LastIndex + 1}/{scrollView.TotalCount}";
+
+        canvas.DrawHeader(isActive, ConsoleString.CreatePlainText(headerText));
+
         var scrollViewCanvas = canvas.GetSubArea(0, 1, canvas.Width, canvas.Height - 1);
         DrawScrollView(scrollViewCanvas);
     }

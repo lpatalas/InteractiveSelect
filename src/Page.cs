@@ -14,6 +14,8 @@ internal readonly struct Page<T>
         : throw new ArgumentOutOfRangeException(nameof(index));
 
     public int Count => count;
+    public int FirstIndex => offset;
+    public int LastIndex => offset + count - 1;
 
     public Page(IReadOnlyList<T> items, int offset, int count)
     {

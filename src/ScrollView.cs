@@ -9,6 +9,8 @@ internal class ScrollView<T>
     private readonly int pageSize;
     private int scrollOffset;
 
+    public int TotalCount => items.Count;
+
     public ScrollView(int pageSize)
     {
         this.items = Array.Empty<T>();

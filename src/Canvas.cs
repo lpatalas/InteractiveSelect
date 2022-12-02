@@ -35,13 +35,21 @@ internal class Canvas
 
     public void DrawHeader(bool isActive, ConsoleString text)
     {
-        var style = isActive switch
+        string? style = isActive switch
         {
-            true => PSStyle.Instance.Foreground.BrightWhite + PSStyle.Instance.Background.Blue,
-            false => PSStyle.Instance.Foreground.White + PSStyle.Instance.Background.BrightBlack
+            true => PSStyle.Instance.Foreground.BrightWhite,
+            false => PSStyle.Instance.Foreground.BrightBlack,
         };
 
-        var styledText = ConsoleString.Concat(ConsoleString.CreateStyled(style), text);
+        var borderStyle = PSStyle.Instance.Foreground.BrightBlack;
+
+        // initial dash and two spaces around caption
+        var paddingLength = Width - text.ContentLength - 4;
+
+        var styledText = ConsoleString.Concat(
+            ConsoleString.CreateStyled(style + "[ " + text + " ]"),
+            ConsoleString.CreateStyled(borderStyle + new string('\u2500', paddingLength)));
+
         FillLine(0, styledText);
     }
 

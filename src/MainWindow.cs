@@ -148,7 +148,9 @@ internal class MainWindow
             var separatorText = ConsoleString.CreateStyled(
                 PSStyle.Instance.Foreground.BrightBlack + "\u2502");
             var separatorCanvas = new Canvas(hostUI, separatorArea);
-            for (int i = 0; i < separatorArea.GetHeight(); i++)
+            separatorCanvas.FillLine(0, ConsoleString.CreateStyled(
+                PSStyle.Instance.Foreground.BrightBlack + "\u252c"));
+            for (int i = 1; i < separatorArea.GetHeight(); i++)
                 separatorCanvas.FillLine(i, separatorText);
         }
     }
