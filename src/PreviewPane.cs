@@ -8,8 +8,10 @@ namespace InteractiveSelect;
 
 internal class PreviewPane
 {
+    private IReadOnlyList<ConsoleString> previewLines = Array.Empty<ConsoleString>();
     private PSObject? previewedObject;
     private readonly PSPropertyExpression? previewExpression;
+    private int scrollOffset;
 
     public PreviewPane(PSPropertyExpression? previewExpression)
     {
@@ -19,6 +21,12 @@ internal class PreviewPane
     public void SetPreviewedObject(PSObject? previewedObject)
     {
         this.previewedObject = previewedObject;
+        if (previewedObject != null)
+            previewLines = GetPreviewLines(previewedObject).ToList();
+        else
+            previewLines = Array.Empty<ConsoleString>();
+
+        scrollOffset = 0;
     }
 
     public bool HandleKey(ConsoleKeyInfo keyInfo)
@@ -30,20 +38,14 @@ internal class PreviewPane
     {
         if (previewedObject != null)
         {
-            var previewLines = GetPreviewLines(previewedObject);
-            var lineIndex = 0;
-            foreach (var line in previewLines.Take(canvas.Height))
-            {
-                canvas.FillLine(lineIndex, line);
-                lineIndex++;
-                if (lineIndex == canvas.Height)
-                    break;
-            }
+            int i = 0;
+            int visibleLineCount = Math.Min(previewLines.Count, canvas.Height);
 
-            for (; lineIndex < canvas.Height; lineIndex++)
-            {
-                canvas.FillLine(lineIndex, ConsoleString.Empty);
-            }
+            for (; i < visibleLineCount; i++)
+                canvas.FillLine(i, previewLines[i + scrollOffset]);
+
+            for (; i < canvas.Height; i++)
+                canvas.FillLine(i, ConsoleString.Empty);
         }
         else
         {
