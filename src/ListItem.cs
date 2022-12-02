@@ -2,6 +2,6 @@
 
 namespace InteractiveSelect;
 
-internal record ListItem(string Label, PSObject? Value)
+internal record ListItem(ConsoleString Label, PSObject? Value)
 {
 }

@@ -89,7 +89,7 @@ internal class ListPane
             _ => $"{PSStyle.Instance.Foreground.BrightBlue}> {listItems.Filter}"
         };
 
-        canvas.FillLine(0, filterText);
+        canvas.FillLine(0, ConsoleString.FromString(filterText, keepSgrSequences: true));
     }
 
     private void DrawItems(Canvas canvas)
@@ -99,12 +99,15 @@ internal class ListPane
             int itemIndex = lineIndex + listItems.ScrollOffset;
             var backgroundColor = (listItems.HighlightedIndex == itemIndex) switch
             {
-                true => PSStyle.Instance.Background.Red,
-                false => string.Empty
+                true => ConsoleString.FromString(PSStyle.Instance.Background.Red, keepSgrSequences: true),
+                false => ConsoleString.Empty
             };
 
-            var text = itemIndex < listItems.Count ? listItems[itemIndex].Label : string.Empty;
-            canvas.FillLine(lineIndex + 1, $"{backgroundColor}{text}");
+            var text = itemIndex < listItems.Count
+                ? listItems[itemIndex].Label
+                : ConsoleString.Empty;
+
+            canvas.FillLine(lineIndex + 1, ConsoleString.Concat(backgroundColor, text));
         }
     }
 }

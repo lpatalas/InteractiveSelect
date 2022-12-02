@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text;
 
 namespace InteractiveSelect;
@@ -9,35 +8,12 @@ internal static class StringExtensions
     private static bool IsControlChar(char c)
         => char.IsControl(c) && c != '\x1b';
 
-    public static string RemoveControlCharactersExceptEsc(this string input)
+    public static string AddEllipsis(this string input, int maxLength)
     {
-        int? firstControlCharIndex = null;
-
-        for (int i = 0; i < input.Length; i++)
-        {
-            if (IsControlChar(input[i]))
-            {
-                firstControlCharIndex = i;
-                break;
-            }
-        }
-
-        if (firstControlCharIndex.HasValue)
-        {
-            var result = new StringBuilder();
-            result.Append(input, 0, firstControlCharIndex.Value);
-            for (int i = firstControlCharIndex.Value + 1; i < input.Length; i++)
-            {
-                if (!IsControlChar(input[i]))
-                    result.Append(input[i]);
-            }
-
-            return result.ToString();
-        }
+        if (input.Length > maxLength)
+            return string.Concat(input.AsSpan(0, maxLength - 1), new ReadOnlySpan<char>('…'));
         else
-        {
             return input;
-        }
     }
 
     public static string RemoveControlSequences(

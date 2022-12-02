@@ -116,8 +116,8 @@ public class SelectInteractiveCmdlet : PSCmdlet
     private ListItem CreateListItem(PSObject? inputItem, int itemIndex)
     {
         var rawText = GetItemText(inputItem, itemIndex);
-        var plainText = rawText.RemoveControlSequences();
-        return new ListItem(plainText, inputItem);
+        var parsedText = ConsoleString.FromString(rawText);
+        return new ListItem(parsedText, inputItem);
     }
 
     private string GetItemText(PSObject? item, int itemIndex)

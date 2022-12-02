@@ -32,9 +32,9 @@ internal class PreviewPane
         {
             var previewLines = GetPreviewLines(previewedObject);
             var lineIndex = 0;
-            foreach (var item in previewLines.Take(canvas.Height))
+            foreach (var line in previewLines.Take(canvas.Height))
             {
-                canvas.FillLine(lineIndex, item);
+                canvas.FillLine(lineIndex, line);
                 lineIndex++;
                 if (lineIndex == canvas.Height)
                     break;
@@ -42,7 +42,7 @@ internal class PreviewPane
 
             for (; lineIndex < canvas.Height; lineIndex++)
             {
-                canvas.FillLine(lineIndex, string.Empty);
+                canvas.FillLine(lineIndex, ConsoleString.Empty);
             }
         }
         else
@@ -51,7 +51,7 @@ internal class PreviewPane
         }
     }
 
-    private IEnumerable<string> GetPreviewLines(PSObject obj)
+    private IEnumerable<ConsoleString> GetPreviewLines(PSObject obj)
     {
         if (previewExpression == null)
             yield break;
@@ -76,15 +76,14 @@ internal class PreviewPane
                 {
                     if (subResult is null)
                     {
-                        yield return string.Empty;
+                        yield return ConsoleString.Empty;
                     }
                     else
                     {
                         var splitLines = subResult.Split('\n');
                         foreach (var splitLine in splitLines)
                         {
-                            // TODO: Keep SGR sequences
-                            yield return splitLine.RemoveControlSequences();
+                            yield return ConsoleString.FromString(splitLine, keepSgrSequences: true);
                         }
                     }
                 }
