@@ -10,6 +10,7 @@ internal class ListView<T>
     private readonly Func<T, string, bool> filterPredicate;
     private readonly List<T> items;
     private readonly IReadOnlyList<T> originalItems;
+    private readonly Action<T?>? highlightedItemChangedCallback;
 
     public T this[int index] => items[index];
 
@@ -25,7 +26,8 @@ internal class ListView<T>
     public ListView(
         IReadOnlyList<T> originalItems,
         int pageSize,
-        Func<T, string, bool> filterPredicate)
+        Func<T, string, bool> filterPredicate,
+        Action<T?>? highlightedItemChangedCallback)
         : this(
               originalItems,
               scrollOffset: 0,
@@ -33,6 +35,7 @@ internal class ListView<T>
               highlightedIndex: originalItems.Count > 0 ? 0 : null,
               filterPredicate)
     {
+        this.highlightedItemChangedCallback = highlightedItemChangedCallback;
     }
 
     public ListView(
@@ -109,12 +112,19 @@ internal class ListView<T>
 
     public void SetHighlightedIndex(int? newIndex)
     {
+        var previousHighlightedItem = HighlightedItem;
+
         if (items.Count > 0 && newIndex.HasValue)
             HighlightedIndex = Math.Clamp(newIndex.Value, 0, items.Count - 1);
         else
             HighlightedIndex = null;
 
         MaintainInvariants();
+
+        if (previousHighlightedItem != HighlightedItem)
+        {
+            highlightedItemChangedCallback?.Invoke(HighlightedItem);
+        }
     }
 
     private void MaintainInvariants()

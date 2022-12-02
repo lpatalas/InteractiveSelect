@@ -12,14 +12,19 @@ internal class PreviewPane
     private PSObject? previewedObject;
     private readonly PSPropertyExpression? previewExpression;
     private int scrollOffset;
+    private readonly int pageSize;
 
-    public PreviewPane(PSPropertyExpression? previewExpression)
+    public PreviewPane(PSPropertyExpression? previewExpression, int pageSize)
     {
         this.previewExpression = previewExpression;
+        this.pageSize = pageSize;
     }
 
     public void SetPreviewedObject(PSObject? previewedObject)
     {
+        if (ReferenceEquals(previewedObject, this.previewedObject))
+            return;
+
         this.previewedObject = previewedObject;
         if (previewedObject != null)
             previewLines = GetPreviewLines(previewedObject).ToList();
@@ -31,6 +36,26 @@ internal class PreviewPane
 
     public bool HandleKey(ConsoleKeyInfo keyInfo)
     {
+        switch (keyInfo.Key)
+        {
+            case ConsoleKey.DownArrow:
+                scrollOffset = Math.Min(
+                    scrollOffset + 1,
+                    Math.Max(0, previewLines.Count - pageSize));
+                return true;
+            case ConsoleKey.UpArrow:
+                scrollOffset = Math.Max(0, scrollOffset - 1);
+                return true;
+            case ConsoleKey.PageDown:
+                scrollOffset = Math.Min(
+                    scrollOffset + pageSize,
+                    Math.Max(0, previewLines.Count - pageSize));
+                return true;
+            case ConsoleKey.PageUp:
+                scrollOffset = Math.Max(0, scrollOffset - pageSize);
+                return true;
+        }
+
         return false;
     }
 

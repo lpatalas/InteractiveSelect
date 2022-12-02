@@ -11,6 +11,13 @@ internal record MainLoopResult(IEnumerable<PSObject?> SelectedItems);
 
 internal class MainWindow
 {
+    private enum ActivePane
+    {
+        List,
+        Preview
+    }
+
+    private ActivePane activePane = ActivePane.List;
     private readonly int height;
     private readonly ListPane listPane;
     private readonly PreviewPane previewPane;
@@ -22,8 +29,8 @@ internal class MainWindow
     {
         this.height = height;
 
-        listPane = new ListPane(listItems, height);
-        previewPane = new PreviewPane(previewExpression);
+        previewPane = new PreviewPane(previewExpression, height);
+        listPane = new ListPane(listItems, height, previewPane.SetPreviewedObject);
     }
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
@@ -39,7 +46,8 @@ internal class MainWindow
             Draw(hostUI, initialCursorPosition);
 
             var pressedKey = Console.ReadKey(intercept: true);
-            var keyHandled = listPane.HandleKey(pressedKey);
+            var keyHandled = HandleKey(pressedKey);
+
             if (keyHandled)
             {
                 previewPane.SetPreviewedObject(listPane.HighlightedObject);
@@ -62,6 +70,24 @@ internal class MainWindow
         ClearConsole(hostUI, initialCursorPosition);
 
         return new MainLoopResult(selectedObjects);
+    }
+
+    private bool HandleKey(ConsoleKeyInfo keyInfo)
+    {
+        if (keyInfo.Key == ConsoleKey.Tab)
+        {
+            if (activePane == ActivePane.List)
+                activePane = ActivePane.Preview;
+            else
+                activePane = ActivePane.List;
+
+            return true;
+        }
+
+        if (activePane == ActivePane.List)
+            return listPane.HandleKey(keyInfo);
+        else
+            return previewPane.HandleKey(keyInfo);
     }
 
     private void Draw(PSHostUserInterface hostUI, Coordinates topLeft)

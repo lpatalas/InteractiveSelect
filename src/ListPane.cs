@@ -9,16 +9,22 @@ namespace InteractiveSelect;
 internal class ListPane
 {
     private readonly ListView<ListItem> listItems;
+    private readonly Action<PSObject?> highlightedItemChangedCallback;
 
     public PSObject? HighlightedObject => listItems.HighlightedItem?.Value;
 
-    public ListPane(IReadOnlyList<ListItem> listItems, int height)
+    public ListPane(
+        IReadOnlyList<ListItem> listItems,
+        int height,
+        Action<PSObject?> highlightedItemChangedCallback)
     {
         var listPageSize = height - 1; // -1 to make space for filter line
         this.listItems = new ListView<ListItem>(
             listItems,
             listPageSize,
-            (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase));
+            (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase),
+            listItem => highlightedItemChangedCallback(listItem?.Value));
+        this.highlightedItemChangedCallback = highlightedItemChangedCallback;
     }
 
     public IEnumerable<PSObject?> GetSelectedObjects()
