@@ -68,7 +68,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
             if (Host.UI.SupportsVirtualTerminal)
             {
                 WriteDebug("Hiding cursor using escape sequence");
-                Host.UI.Write(AnsiControlSequences.HideCursor);
+                Host.UI.Write(EscapeSequence.HideCursor);
                 didHideCursor = true;
             }
             else if (OperatingSystem.IsWindows())
@@ -91,7 +91,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
                 if (didHideCursor)
                 {
                     if (Host.UI.SupportsVirtualTerminal)
-                        Host.UI.Write(AnsiControlSequences.ShowCursor);
+                        Host.UI.Write(EscapeSequence.ShowCursor);
                     else if (OperatingSystem.IsWindows())
                         Console.CursorVisible = true;
                 }

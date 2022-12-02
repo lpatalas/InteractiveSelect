@@ -40,7 +40,9 @@ internal static class StringExtensions
         }
     }
 
-    public static string RemoveControlSequences(this string input)
+    public static string RemoveControlSequences(
+        this string input,
+        bool keepSgrSequences = false)
     {
         int i = 0;
 
@@ -53,33 +55,16 @@ internal static class StringExtensions
         var result = new StringBuilder(input.Length);
         result.Append(input.AsSpan(0, i));
 
-        static void SkipControlSequence(string input, ref int i)
-        {
-            Debug.Assert(i < input.Length - 1);
-            Debug.Assert(input[i] == '\x1b');
-            Debug.Assert(input[i + 1] == '[');
-
-            i += 2; // Skip leading "ESC[" pair
-
-            while (i < input.Length && (input[i] < '\x40' || input[i] > '\x7e'))
-            {
-                i++;
-            }
-
-            if (i < input.Length)
-                i++; // Skip sequence terminator
-        }
-
         while (i < input.Length)
         {
             char c = input[i];
 
             if (c == '\x1b')
             {
-                if (i < input.Length - 1 && input[i + 1] == '[')
-                    SkipControlSequence(input, ref i);
-                else
-                    i++; // Skip lone ESC character at the end of the input
+                var sequence = EscapeSequence.Parse(input.AsSpan(i));
+                if (keepSgrSequences && sequence.Code == EscapeSequenceCode.Sgr)
+                    result.Append(sequence.AsSpan());
+                i += sequence.Length;
             }
             else
             {

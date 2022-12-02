@@ -35,6 +35,16 @@ public class StringExtensionTests
         }
 
         [Theory]
+        [InlineData("text", "text")]
+        [InlineData("\x1b[1;31mred", "\x1b[1;31mred")]
+        [InlineData("(\u001b[?25h)(\x1b[1;31m)(\x1b[1B)", "()(\x1b[1;31m)()")]
+        public void ShouldKeepSgrControlSequencesIfSuchFlagIsSet(string input, string expected)
+        {
+            var result = input.RemoveControlSequences(keepSgrSequences: true);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
         [InlineData("\x1b", "")]
         [InlineData("\x1b[", "")]
         [InlineData("\x1b[0000", "")]
