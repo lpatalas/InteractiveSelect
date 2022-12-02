@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace InteractiveSelect;
 
@@ -31,8 +30,8 @@ internal readonly ref struct EscapeSequence
 
     public static EscapeSequence Parse(ReadOnlySpan<char> input)
     {
-        Debug.Assert(input.Length > 0);
-        Debug.Assert(input[0] == '\x1b');
+        if (input.Length == 0 || input[0] != '\x1b')
+            return new EscapeSequence(ReadOnlySpan<char>.Empty);
 
         if (input.Length < 2 || input[1] < 0x40 || input[1] > 0x5f)
             return new EscapeSequence(input.Slice(0, 1));
@@ -71,7 +70,7 @@ internal readonly ref struct EscapeSequence
                         i++;
                     }
 
-                    if (input[i] == '\x1b')
+                    if (input[i] == '\b')
                         i++;
                     if (i < input.Length - 1 && input[i] == '\x1b' && input[i + 1] == '\\')
                         i += 2;
