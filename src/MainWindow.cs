@@ -45,7 +45,7 @@ internal class MainWindow
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
     {
-        var initialCursorPosition = hostUI.RawUI.CursorPosition;
+        var initialCursorPosition = ReserveBufferSpace(hostUI);
 
         previewPane?.SetPreviewedObject(listPane.HighlightedObject);
 
@@ -94,6 +94,13 @@ internal class MainWindow
             return listPane.HandleKey(keyInfo);
         else
             return previewPane?.HandleKey(keyInfo) ?? false;
+    }
+
+    private Coordinates ReserveBufferSpace(PSHostUserInterface hostUI)
+    {
+        var initCommand = new string('\n', height) + EscapeSequence.CursorUp(height);
+        hostUI.Write(initCommand);
+        return hostUI.RawUI.CursorPosition;
     }
 
     private void Draw(PSHostUserInterface hostUI, Coordinates topLeft)

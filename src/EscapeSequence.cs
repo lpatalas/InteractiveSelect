@@ -14,6 +14,7 @@ internal readonly ref struct EscapeSequence
 
     public static EscapeSequence ShowCursor => new EscapeSequence($"\x1b[?25h");
     public static EscapeSequence HideCursor => new EscapeSequence($"\x1b[?25l");
+    public static EscapeSequence CursorUp(int cells) => new EscapeSequence($"\x1b[{cells}A");
 
     public EscapeSequenceCode Code => chars switch
     {

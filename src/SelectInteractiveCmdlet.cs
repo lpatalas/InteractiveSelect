@@ -81,7 +81,6 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
             try
             {
-                Console.CursorVisible = false;
                 var mainWindow = new MainWindow(
                     listItems,
                     Height.GetValueOrDefault(10),
