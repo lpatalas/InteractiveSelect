@@ -83,7 +83,7 @@ internal class PreviewPane
                         var splitLines = subResult.Split('\n');
                         foreach (var splitLine in splitLines)
                         {
-                            yield return ConsoleString.FromString(splitLine, keepSgrSequences: true);
+                            yield return ConsoleString.CreateStyled(splitLine);
                         }
                     }
                 }

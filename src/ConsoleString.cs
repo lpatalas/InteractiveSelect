@@ -22,7 +22,13 @@ internal readonly struct ConsoleString
         this.value = value;
     }
 
-    public static ConsoleString FromString(string input, bool keepSgrSequences = false)
+    public static ConsoleString CreatePlainText(string input)
+        => ParseString(input, keepSgrSequences: false);
+
+    public static ConsoleString CreateStyled(string input)
+        => ParseString(input, keepSgrSequences: true);
+
+    private static ConsoleString ParseString(string input, bool keepSgrSequences = false)
     {
         int i = 0;
 
@@ -70,6 +76,9 @@ internal readonly struct ConsoleString
 
     public ConsoleString AddEllipsis(int maxLength)
     {
+        if (maxLength < 1)
+            return ConsoleString.Empty;
+
         if (value == null || ContentLength <= maxLength || value.Length <= maxLength)
             return this;
 
@@ -124,7 +133,7 @@ internal readonly struct ConsoleString
     }
 
     public ConsoleString ToPlainText()
-        => hasEscapeSequences ? FromString(value ?? string.Empty) : this;
+        => hasEscapeSequences ? CreatePlainText(value ?? string.Empty) : this;
 
     public override bool Equals(object? obj)
         => obj is ConsoleString other
