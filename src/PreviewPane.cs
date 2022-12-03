@@ -66,8 +66,11 @@ internal class PreviewPane
 
         canvas.DrawHeader(isActive, ConsoleString.CreatePlainText(headerText));
 
-        var scrollViewCanvas = canvas.GetSubArea(0, 1, canvas.Width, canvas.Height - 1);
+        var scrollViewCanvas = canvas.GetSubArea(0, 1, canvas.Width - 1, canvas.Height - 1);
         DrawScrollView(scrollViewCanvas);
+
+        var scrollBarCanvas = canvas.GetSubArea(canvas.Width - 1, 1, 1, canvas.Height - 1);
+        DrawScrollBar(scrollBarCanvas);
     }
 
     private void DrawScrollView(Canvas canvas)
@@ -80,6 +83,22 @@ internal class PreviewPane
 
         for (; lineIndex < canvas.Height; lineIndex++)
             canvas.FillLine(lineIndex, ConsoleString.Empty);
+    }
+
+    private void DrawScrollBar(Canvas canvas)
+    {
+        var page = scrollView.GetCurrentPage();
+        var scrollBar = ScrollBarLayout.Compute(
+            canvas.Height,
+            page.FirstIndex,
+            page.Count,
+            scrollView.TotalCount);
+
+        for (int i = 0; i < scrollBar.TotalSize; i++)
+        {
+            var glyph = scrollBar.GetVerticalGlyph(i);
+            canvas.FillLine(i, ConsoleString.CreatePlainText(glyph.ToString()));
+        }
     }
 
     private IEnumerable<ConsoleString> GetPreviewLines(PSObject obj)

@@ -21,6 +21,9 @@ internal readonly record struct ScrollBarLayout(
         int pageSize,
         int totalCount)
     {
+        if (totalCount < 1)
+            return new ScrollBarLayout(0, scrollBarSize, 0);
+
         var visibleItemCount = Math.Min(totalCount, pageSize);
         var thumbStart = scrollOffset * scrollBarSize / totalCount;
         var thumbSize = Math.Max(1, visibleItemCount * scrollBarSize / totalCount);

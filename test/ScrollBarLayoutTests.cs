@@ -10,6 +10,7 @@ public class ScrollBarLayoutTests
     [InlineData(   1,      0,    5,    10, "X")]
     [InlineData(   2,      0,    5,    10, "X-")]
     [InlineData(   2,      5,    5,    10, "-X")]
+    [InlineData(   6,      0,    5,     0, "XXXXXX")]
     [InlineData(   6,      0,    1,     1, "XXXXXX")]
     [InlineData(   6,      0,    5,     5, "XXXXXX")]
     [InlineData(   6,      0,   10,     5, "XXXXXX")]
