@@ -46,11 +46,18 @@ internal class Canvas
         // initial dash and two spaces around caption
         var paddingLength = Width - text.ContentLength - 4;
 
-        var styledText = ConsoleString.Concat(
-            ConsoleString.CreateStyled(style + "[ " + text + " ]"),
-            ConsoleString.CreateStyled(borderStyle + new string('\u2500', paddingLength)));
+        if (paddingLength >= 0)
+        {
+            var styledText = ConsoleString.Concat(
+                ConsoleString.CreateStyled(style + "[ " + text + " ]"),
+                ConsoleString.CreateStyled(borderStyle + new string('\u2500', paddingLength)));
+            FillLine(0, styledText);
+        }
+        else
+        {
+            FillLine(0, ConsoleString.CreateStyled(style + new string('\u2500', Width)));
+        }
 
-        FillLine(0, styledText);
     }
 
     public void FillLine(int lineIndex, ConsoleString text)

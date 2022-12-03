@@ -18,7 +18,7 @@ internal class ListPane
         int height,
         Action<PSObject?> highlightedItemChangedCallback)
     {
-        var listPageSize = height - 1; // -1 to make space for filter line
+        var listPageSize = height - 1; // -1 to make space for header
         this.listItems = new ListView<ListItem>(
             listItems,
             listPageSize,
@@ -84,7 +84,7 @@ internal class ListPane
     public void Draw(Canvas canvas, bool isActive)
     {
         DrawFilter(canvas, isActive);
-        DrawItems(canvas);
+        DrawList(canvas.GetSubArea(0, 1, canvas.Width, canvas.Height - 1));
     }
 
     private void DrawFilter(Canvas canvas, bool isActive)
@@ -99,6 +99,15 @@ internal class ListPane
         };
 
         canvas.DrawHeader(isActive, ConsoleString.CreatePlainText(filterText));
+    }
+
+    private void DrawList(Canvas canvas)
+    {
+        var itemsCanvas = canvas.GetSubArea(0, 0, canvas.Width - 1, canvas.Height);
+        var scrollBarCanvas = canvas.GetSubArea(canvas.Width - 1, 0, 1, canvas.Height);
+
+        DrawItems(itemsCanvas);
+        DrawScrollBar(scrollBarCanvas);
     }
 
     private void DrawItems(Canvas canvas)
@@ -116,7 +125,23 @@ internal class ListPane
                 ? listItems[itemIndex].Label
                 : ConsoleString.Empty;
 
-            canvas.FillLine(lineIndex + 1, ConsoleString.Concat(backgroundColor, text));
+            var line = ConsoleString.Concat(backgroundColor, text);
+            canvas.FillLine(lineIndex, line);
+        }
+    }
+
+    private void DrawScrollBar(Canvas canvas)
+    {
+        var scrollBar = ScrollBarLayout.Compute(
+            canvas.Height,
+            listItems.ScrollOffset,
+            listItems.PageSize,
+            listItems.Count);
+
+        for (int i = 0; i < canvas.Height; i++)
+        {
+            var glyph = scrollBar.GetVerticalGlyph(i);
+            canvas.FillLine(i, ConsoleString.CreatePlainText(glyph.ToString()));
         }
     }
 }

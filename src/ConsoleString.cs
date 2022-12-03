@@ -132,6 +132,19 @@ internal readonly struct ConsoleString
             hasEscapeSequences: first.hasEscapeSequences || second.hasEscapeSequences);
     }
 
+    public static ConsoleString Concat(
+        ConsoleString s1,
+        ConsoleString s2,
+        ConsoleString s3,
+        ConsoleString s4)
+    {
+        var concatenatedValues = string.Concat(s1.value, s2.value, s3.value, s4.value);
+        return new ConsoleString(
+            concatenatedValues,
+            contentLength: s1.ContentLength + s2.ContentLength + s3.ContentLength + s4.ContentLength,
+            hasEscapeSequences: s1.hasEscapeSequences || s2.hasEscapeSequences || s3.hasEscapeSequences || s4.hasEscapeSequences);
+    }
+
     public ConsoleString ToPlainText()
         => hasEscapeSequences ? CreatePlainText(value ?? string.Empty) : this;
 
