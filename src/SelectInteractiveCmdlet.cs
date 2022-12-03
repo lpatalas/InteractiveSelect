@@ -35,8 +35,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
     public PSObject?[]? Items { get; set; }
 
     [Parameter]
-    [ValidateRange(2, int.MaxValue)]
-    public int? Height { get; set; }
+    public DimensionParameter? Height { get; set; }
 
     private bool HasPipelineInput
         => string.Equals(ParameterSetName, ParameterSets.InputFromPipeline, StringComparison.Ordinal);
@@ -81,9 +80,12 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
             try
             {
+                var windowHeight = Host.UI.RawUI.WindowSize.Height;
+                var calculatedHeight = Height?.Value?.CalculateAbsoluteValue(windowHeight);
+
                 var mainWindow = new MainWindow(
                     listItems,
-                    Height.GetValueOrDefault(10),
+                    calculatedHeight.GetValueOrDefault(20),
                     Preview);
 
                 var result = mainWindow.RunMainLoop(Host.UI);
