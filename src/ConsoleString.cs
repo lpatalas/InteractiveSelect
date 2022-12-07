@@ -5,20 +5,17 @@ namespace InteractiveSelect;
 
 internal readonly struct ConsoleString
 {
-    private readonly bool hasEscapeSequences;
     private readonly string? value;
+
+    private bool HasEscapeSequences => ContentLength != (value?.Length ?? 0);
 
     public int ContentLength { get; }
 
     public static readonly ConsoleString Empty = new ConsoleString();
 
-    private ConsoleString(
-        string value,
-        int contentLength,
-        bool hasEscapeSequences)
+    private ConsoleString(string value, int contentLength)
     {
         this.ContentLength = contentLength;
-        this.hasEscapeSequences = hasEscapeSequences;
         this.value = value;
     }
 
@@ -36,9 +33,8 @@ internal readonly struct ConsoleString
             i++;
 
         if (i == input.Length)
-            return new ConsoleString(input, input.Length, hasEscapeSequences: false);
+            return new ConsoleString(input, input.Length);
 
-        bool hasEscapeSequences = false;
         int contentLength = i;
 
         var result = new StringBuilder(input.Length);
@@ -54,7 +50,6 @@ internal readonly struct ConsoleString
                 if (keepSgrSequences && sequence.Code == EscapeSequenceCode.Sgr)
                 {
                     result.Append(sequence.AsSpan());
-                    hasEscapeSequences = true;
                 }
 
                 i += sequence.Length;
@@ -71,7 +66,7 @@ internal readonly struct ConsoleString
             }
         }
 
-        return new ConsoleString(result.ToString(), contentLength, hasEscapeSequences);
+        return new ConsoleString(result.ToString(), contentLength);
     }
 
     public ConsoleString AddEllipsis(int maxLength)
@@ -82,18 +77,16 @@ internal readonly struct ConsoleString
         if (value == null || ContentLength <= maxLength || value.Length <= maxLength)
             return this;
 
-        if (!hasEscapeSequences)
+        if (!HasEscapeSequences)
         {
             var truncatedString = value.AddEllipsis(maxLength);
             return new ConsoleString(
                 truncatedString,
-                contentLength: truncatedString.Length,
-                hasEscapeSequences: false);
+                contentLength: truncatedString.Length);
         }
 
         int i = 0;
         int contentLength = 0;
-        bool foundEscapeSequence = false;
 
         while (i < value.Length && contentLength < maxLength - 1)
         {
@@ -101,7 +94,6 @@ internal readonly struct ConsoleString
             {
                 var sequence = EscapeSequence.Parse(value.AsSpan(i));
                 i += sequence.Length;
-                foundEscapeSequence = true;
             }
             else
             {
@@ -115,8 +107,7 @@ internal readonly struct ConsoleString
 
         return new ConsoleString(
             string.Concat(value.AsSpan(0, i), new ReadOnlySpan<char>('…')),
-            contentLength: maxLength,
-            hasEscapeSequences: foundEscapeSequence);
+            contentLength: maxLength);
     }
 
     // TODO: This can give incorrect answer if string contains escape sequences
@@ -128,8 +119,7 @@ internal readonly struct ConsoleString
         var concatenatedValues = string.Concat(first.value, second.value);
         return new ConsoleString(
             concatenatedValues,
-            contentLength: first.ContentLength + second.ContentLength,
-            hasEscapeSequences: first.hasEscapeSequences || second.hasEscapeSequences);
+            contentLength: first.ContentLength + second.ContentLength);
     }
 
     public static ConsoleString Concat(
@@ -141,12 +131,11 @@ internal readonly struct ConsoleString
         var concatenatedValues = string.Concat(s1.value, s2.value, s3.value, s4.value);
         return new ConsoleString(
             concatenatedValues,
-            contentLength: s1.ContentLength + s2.ContentLength + s3.ContentLength + s4.ContentLength,
-            hasEscapeSequences: s1.hasEscapeSequences || s2.hasEscapeSequences || s3.hasEscapeSequences || s4.hasEscapeSequences);
+            contentLength: s1.ContentLength + s2.ContentLength + s3.ContentLength + s4.ContentLength);
     }
 
     public ConsoleString ToPlainText()
-        => hasEscapeSequences ? CreatePlainText(value ?? string.Empty) : this;
+        => HasEscapeSequences ? CreatePlainText(value ?? string.Empty) : this;
 
     public override bool Equals(object? obj)
         => obj is ConsoleString other

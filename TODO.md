@@ -7,3 +7,4 @@
 # To Do
 
 - Use `Page` class in `ListView` instead of directly exposing properties
+- Add word wrapping in preview panel
