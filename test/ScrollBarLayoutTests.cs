@@ -15,11 +15,12 @@ public class ScrollBarLayoutTests
     [InlineData(   6,      0,    5,     5, "XXXXXX")]
     [InlineData(   6,      0,   10,     5, "XXXXXX")]
     [InlineData(   6,      0,    5,    10, "XXX---")]
-    [InlineData(   6,      1,    5,    10, "XXX---")]
+    [InlineData(   6,      1,    5,    10, "-XXX--")]
     [InlineData(   6,      2,    5,    10, "-XXX--")]
-    [InlineData(   6,      3,    5,    10, "-XXX--")]
+    [InlineData(   6,      3,    5,    10, "--XXX-")]
     [InlineData(   6,      4,    5,    10, "--XXX-")]
     [InlineData(   6,      5,    5,    10, "---XXX")]
+    [InlineData(  19,      9,   19,    28, "------XXXXXXXXXXXXX")]
     public void RunTests(
         int scrollBarSize, int scrollOffset, int pageSize, int totalCount, string expected)
     {

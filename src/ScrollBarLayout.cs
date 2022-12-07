@@ -25,14 +25,17 @@ internal readonly record struct ScrollBarLayout(
             return new ScrollBarLayout(0, scrollBarSize, 0);
 
         var visibleItemCount = Math.Min(totalCount, pageSize);
-        var thumbStart = scrollOffset * scrollBarSize / totalCount;
-        var thumbSize = Math.Max(1, visibleItemCount * scrollBarSize / totalCount);
+        var thumbStart = DivRound(scrollOffset * scrollBarSize, totalCount);
+        var thumbSize = Math.Max(1, DivRound(visibleItemCount * scrollBarSize, totalCount));
 
         return new ScrollBarLayout(
             thumbStart,
             thumbSize,
             Math.Max(0, scrollBarSize - thumbSize - thumbStart));
     }
+
+    private static int DivRound(int a, int b)
+        => (a + b / 2) / b;
 
     public char GetVerticalGlyph(int offset)
     {
