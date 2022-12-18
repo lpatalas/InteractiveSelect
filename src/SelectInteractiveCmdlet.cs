@@ -84,6 +84,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
                 var calculatedHeight = Height?.Value?.CalculateAbsoluteValue(windowHeight);
 
                 var mainWindow = new MainWindow(
+                    Host.UI,
                     listItems,
                     calculatedHeight.GetValueOrDefault(20),
                     Preview);

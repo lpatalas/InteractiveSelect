@@ -20,18 +20,29 @@ internal class MainWindow
     private ActivePane activePane = ActivePane.List;
     private readonly int height;
     private readonly ListPane listPane;
+    private readonly int listPaneWidth;
     private readonly int maxItemLength;
     private readonly PreviewPane? previewPane;
 
     public MainWindow(
+        PSHostUserInterface hostUI,
         IReadOnlyList<ListItem> listItems,
         int height,
         PSPropertyExpression? previewExpression)
     {
         this.height = height;
+        maxItemLength = listItems.Max(item => item.Label.ContentLength);
 
         if (previewExpression != null)
-            previewPane = new PreviewPane(previewExpression, height);
+        {
+            listPaneWidth = Math.Min(maxItemLength, hostUI.RawUI.WindowSize.Width / 2);
+            int previewWidth = hostUI.RawUI.WindowSize.Width - listPaneWidth - 1;
+            previewPane = new PreviewPane(previewExpression, previewWidth, height);
+        }
+        else
+        {
+            listPaneWidth = Math.Min(maxItemLength, hostUI.RawUI.WindowSize.Width);
+        }
 
         Action<PSObject?> highlightedItemChangedCallback = previewPane switch
         {
@@ -40,7 +51,6 @@ internal class MainWindow
         };
 
         listPane = new ListPane(listItems, height, highlightedItemChangedCallback);
-        maxItemLength = listItems.Max(item => item.Label.ContentLength);
     }
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
@@ -111,18 +121,10 @@ internal class MainWindow
             hostUI.RawUI.BufferSize.Width,
             topLeft.Y + height);
 
-        var listPaneRight = previewPane switch
-        {
-            { } => (mainArea.Left + mainArea.Right) / 2,
-            null => mainArea.Right
-        };
-
-        listPaneRight = Math.Min(listPaneRight, mainArea.Left + maxItemLength);
-
         var listPaneArea = new Rectangle(
             mainArea.Left,
             mainArea.Top,
-            listPaneRight,
+            mainArea.Left + listPaneWidth,
             mainArea.Bottom);
 
         var listPaneCanvas = new Canvas(hostUI, listPaneArea);

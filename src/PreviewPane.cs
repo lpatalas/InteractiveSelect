@@ -8,12 +8,14 @@ namespace InteractiveSelect;
 
 internal class PreviewPane
 {
+    private readonly int maxLineLength;
     private PSObject? previewedObject;
     private readonly PSPropertyExpression? previewExpression;
     private readonly ScrollView<ConsoleString> scrollView;
 
-    public PreviewPane(PSPropertyExpression? previewExpression, int height)
+    public PreviewPane(PSPropertyExpression? previewExpression, int width, int height)
     {
+        this.maxLineLength = width - 1; // "- 1" to make space for the scrollbar
         this.previewExpression = previewExpression;
         this.scrollView = new ScrollView<ConsoleString>(pageSize: height - 1);
     }
@@ -133,7 +135,12 @@ internal class PreviewPane
                         var splitLines = subResult.Split('\n');
                         foreach (var splitLine in splitLines)
                         {
-                            yield return ConsoleString.CreateStyled(splitLine);
+                            var line = ConsoleString.CreateStyled(splitLine);
+                            var wrappedLines = line.WordWrap(maxLineLength);
+                            foreach (var item in wrappedLines)
+                            {
+                                yield return item;
+                            }
                         }
                     }
                 }
