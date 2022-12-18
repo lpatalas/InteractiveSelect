@@ -1,5 +1,6 @@
 ﻿using System.Management.Automation.Language;
 using Xunit;
+using static InteractiveSelect.Tests.ListViewTests;
 
 namespace InteractiveSelect.Tests;
 
@@ -89,5 +90,34 @@ public class ConsoleStringTests
         var result = styledString.AddEllipsis(maxLength);
 
         Assert.Equal(expected, result.ToString());
+    }
+
+    [Theory]
+    [InlineData("t|e|x|t", 1)]
+    [InlineData("te|xt", 2)]
+    [InlineData("tex|t", 3)]
+    [InlineData("text", 4)]
+    [InlineData("text", 5)]
+
+    [InlineData("abc| ab|c", 3)]
+    [InlineData("abc |abc", 5)]
+    [InlineData("abc abc", 7)]
+
+    [InlineData("abc abc| abc", 7)]
+    [InlineData("abc abc |abc", 8)]
+    [InlineData("abc abc |abc", 9)]
+
+    [InlineData("  |  ", 2)]
+    [InlineData(" a|b", 2)]
+    [InlineData("  | a|b", 2)]
+    [InlineData("a | b", 2)]
+    public void WordWrapTests(string pattern, int lineLength)
+    {
+        var inputString = pattern.Replace("|", "");
+        var expected = pattern.Split('|').Select(ConsoleString.CreatePlainText).ToList();
+
+        var input = ConsoleString.CreatePlainText(inputString);
+        var result = input.WordWrap(lineLength);
+        Assert.Equal(expected, result);
     }
 }

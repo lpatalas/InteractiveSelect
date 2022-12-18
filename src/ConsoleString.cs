@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Management.Automation.Language;
+using System.Net.WebSockets;
 using System.Text;
 
 namespace InteractiveSelect;
@@ -108,6 +112,86 @@ internal readonly struct ConsoleString
         return new ConsoleString(
             string.Concat(value.AsSpan(0, i), new ReadOnlySpan<char>('…')),
             contentLength: maxLength);
+    }
+
+    public IReadOnlyList<ConsoleString> WordWrap(int lineLength)
+    {
+        Debug.Assert(lineLength > 0);
+
+        if (value == null || ContentLength <= lineLength)
+            return new[] { this };
+
+        var results = new List<ConsoleString>();
+        var currentLine = new StringBuilder(capacity: lineLength);
+        var currentLineLength = 0;
+        var i = 0;
+        int? lengthUntilLastSpace = null;
+        int? contentLengthUntilLastSpace = null;
+        bool hasContent = false;
+        
+        while (i < value.Length)
+        {
+            if (value[i] == '\x1b')
+            {
+                var sequence = EscapeSequence.Parse(value.AsSpan(i));
+                currentLine.Append(sequence.AsSpan());
+                i += sequence.Length;
+            }
+            else
+            {
+                currentLine.Append(value[i]);
+                currentLineLength++;
+
+                if (char.IsWhiteSpace(value[i]))
+                {
+                    if (hasContent)
+                    {
+                        lengthUntilLastSpace = currentLine.Length;
+                        contentLengthUntilLastSpace = currentLineLength;
+                    }
+                }
+                else
+                {
+                    hasContent = true;
+                }
+
+                i++;
+            }
+
+            if (currentLineLength == lineLength)
+            {
+                Debug.Assert(lengthUntilLastSpace.HasValue == contentLengthUntilLastSpace.HasValue);
+
+                var isNextCharSpace = i < value.Length && char.IsWhiteSpace(value[i]);
+
+                if (lengthUntilLastSpace.HasValue
+                    && contentLengthUntilLastSpace.HasValue
+                    && !isNextCharSpace)
+                {
+                    var usedPart = currentLine.ToString(0, lengthUntilLastSpace.Value);
+                    results.Add(new ConsoleString(usedPart, currentLineLength));
+                    currentLine.Remove(0, lengthUntilLastSpace.Value);
+                    currentLineLength -= contentLengthUntilLastSpace.Value;
+                }
+                else
+                {
+                    results.Add(new ConsoleString(currentLine.ToString(), currentLineLength));
+                    currentLine.Clear();
+                    currentLineLength = 0;
+                    hasContent = false;
+                }
+
+                lengthUntilLastSpace = null;
+                contentLengthUntilLastSpace = null;
+            }
+        }
+
+        if (currentLineLength > 0)
+        {
+            results.Add(new ConsoleString(currentLine.ToString(), currentLineLength));
+        }
+
+        return results;
     }
 
     // TODO: This can give incorrect answer if string contains escape sequences
