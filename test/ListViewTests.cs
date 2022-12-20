@@ -41,6 +41,8 @@ public class ListViewTests
                     > ItemB |
                       ItemC
                     """,
+
+                ExpectedChangeNotifications = { "ItemB" }
             },
             new Scenario("Scroll down when the last item on the page was selected")
             {
@@ -58,6 +60,8 @@ public class ListViewTests
                       ItemB |
                     > ItemC |
                     """,
+
+                ExpectedChangeNotifications = { "ItemC" }
             },
 
             new Scenario("Do nothing when the last item is already selected")
@@ -76,6 +80,8 @@ public class ListViewTests
                       ItemB |
                     > ItemC |
                     """,
+
+                ExpectNoChangeNotifications = true
             }
         };
 
@@ -103,6 +109,8 @@ public class ListViewTests
                       ItemB |
                       ItemC
                     """,
+
+                ExpectedChangeNotifications = { "ItemA" }
             },
             new Scenario("Scroll up when the first item on the page was selected")
             {
@@ -120,6 +128,8 @@ public class ListViewTests
                       ItemB |
                       ItemC
                     """,
+
+                ExpectedChangeNotifications = { "ItemA" }
             },
 
             new Scenario("Do nothing when the first item is already selected")
@@ -138,6 +148,8 @@ public class ListViewTests
                       ItemB |
                       ItemC
                     """,
+
+                ExpectNoChangeNotifications = true
             }
         };
 
@@ -167,6 +179,8 @@ public class ListViewTests
                       ItemC |
                       ItemD
                     """,
+
+                ExpectedChangeNotifications = { "ItemA" }
             },
             new Scenario("Scroll to the top when it's not visible on the current page")
             {
@@ -186,6 +200,8 @@ public class ListViewTests
                       ItemC |
                       ItemD
                     """,
+
+                ExpectedChangeNotifications = { "ItemA" }
             },
 
             new Scenario("Do nothing when the first item is already selected")
@@ -206,6 +222,8 @@ public class ListViewTests
                       ItemC |
                       ItemD
                     """,
+
+                ExpectNoChangeNotifications = true
             }
         };
 
@@ -235,6 +253,8 @@ public class ListViewTests
                       ItemC |
                     > ItemD |
                     """,
+
+                ExpectedChangeNotifications = { "ItemD" }
             },
             new Scenario("Scroll to the bottom it's not visible on the current page")
             {
@@ -254,6 +274,8 @@ public class ListViewTests
                       ItemC |
                     > ItemD |
                     """,
+
+                ExpectedChangeNotifications = { "ItemD" }
             },
 
             new Scenario("Do nothing when the last item is already selected")
@@ -274,6 +296,8 @@ public class ListViewTests
                       ItemC |
                     > ItemD |
                     """,
+
+                ExpectNoChangeNotifications = true
             }
         };
 
@@ -303,6 +327,8 @@ public class ListViewTests
                     > ItemC |
                       ItemD
                     """,
+
+                ExpectedChangeNotifications = { "ItemC" }
             },
             new Scenario("Scroll down when the new item is outside the current page")
             {
@@ -324,6 +350,8 @@ public class ListViewTests
                     > ItemD |
                       ItemE
                     """,
+
+                ExpectedChangeNotifications = { "ItemD" }
             },
 
             new Scenario("Should highlight last item when list is already scrolled to the end")
@@ -346,6 +374,8 @@ public class ListViewTests
                       ItemD |
                     > ItemE |
                     """,
+
+                ExpectedChangeNotifications = { "ItemE" }
             },
 
             new Scenario("Do nothing when the last item is already selected")
@@ -364,6 +394,8 @@ public class ListViewTests
                       ItemB |
                     > ItemC |
                     """,
+
+                ExpectNoChangeNotifications = true
             }
         };
 
@@ -393,6 +425,8 @@ public class ListViewTests
                       ItemC |
                       ItemD
                     """,
+
+                ExpectedChangeNotifications = { "ItemA" }
             },
             new Scenario("Scroll up when the new item is outside the current page")
             {
@@ -414,6 +448,8 @@ public class ListViewTests
                       ItemD |
                       ItemE
                     """,
+
+                ExpectedChangeNotifications = { "ItemB" }
             },
 
             new Scenario("Should highlight first item when list is already scrolled to the end")
@@ -436,6 +472,8 @@ public class ListViewTests
                       ItemD |
                       ItemE
                     """,
+
+                ExpectedChangeNotifications = { "ItemA" }
             },
 
             new Scenario("Do nothing when the first item is already selected")
@@ -454,7 +492,85 @@ public class ListViewTests
                       ItemB |
                       ItemC
                     """,
+
+                ExpectNoChangeNotifications = true
             }
+        };
+
+    [Theory]
+    [MemberData(nameof(FilteringScenarios))]
+    public void FilteringScenarioTests(Scenario testCase)
+        => RunScenario(testCase);
+
+    public static TheoryData<Scenario> FilteringScenarios =>
+        new()
+        {
+            new Scenario("Keep highlighted index as is if it's still visible")
+            {
+                Before = """
+                      AAB |
+                      AAC |
+                    > BBB |
+                      BCC
+                    """,
+
+                Action = listView =>
+                    listView.Filter = "B",
+
+                After = """
+                      AAB |
+                    > BBB |
+                      BCC |
+                    """,
+
+                ExpectNoChangeNotifications = true
+            },
+
+            new Scenario("Move highlighted index to the first item if currently highlighted one was filtered-out")
+            {
+                Before = """
+                      AAA |
+                      ABB |
+                    > BBB |
+                      ACC
+                    """,
+
+                Action = listView =>
+                    listView.Filter = "A",
+
+                After = """
+                    > AAA |
+                      ABB |
+                      ACC |
+                    """,
+
+                ExpectedChangeNotifications = { "AAA" }
+            },
+
+            new Scenario("Adjust scroll offset when highlighted item position change after filtering")
+            {
+                Before = """
+                      AAA
+                      ABB
+                    > BBB |
+                      ACC |
+                      CCC |
+                      CCB
+                      CBD
+                    """,
+
+                Action = listView =>
+                    listView.Filter = "B",
+
+                After = """
+                      ABB
+                    > BBB |
+                      CCB |
+                      CBD |
+                    """,
+
+                ExpectNoChangeNotifications = true
+            },
         };
 
     public record Scenario(string Name)
@@ -462,20 +578,27 @@ public class ListViewTests
         internal string Before { get; init; } = default!;
         internal string After { get; init; } = default!;
         internal Action<ListView<string>> Action { get; init; } = default!;
+        internal IList<string> ExpectedChangeNotifications { get; init; } = new List<string>();
+        internal bool ExpectNoChangeNotifications { get; init; }
     }
 
     private static void RunScenario(Scenario testCase)
     {
+        Trace.Assert(
+            !testCase.ExpectNoChangeNotifications || !testCase.ExpectedChangeNotifications.Any(),
+            $"{nameof(testCase.ExpectNoChangeNotifications)} and {nameof(testCase.ExpectedChangeNotifications)} can't be both set at the same time");
+
         var testedListView = LoadListViewFromAsciiArt(testCase.Before);
         var expectedListView = LoadListViewFromAsciiArt(testCase.After);
 
-        Trace.Assert(testedListView.OriginalItems.Count == expectedListView.OriginalItems.Count);
+        //Trace.Assert(testedListView.OriginalItems.Count == expectedListView.OriginalItems.Count);
         Trace.Assert(testedListView.PageSize == expectedListView.PageSize);
 
         testCase.Action(testedListView);
 
         if (testedListView.ScrollOffset != expectedListView.ScrollOffset
-            || testedListView.HighlightedIndex != expectedListView.HighlightedIndex)
+            || testedListView.HighlightedIndex != expectedListView.HighlightedIndex
+            || !testedListView.Items.SequenceEqual(expectedListView.Items))
         {
             var actualResult = SaveListViewAsAsciiArt(testedListView);
 
@@ -491,9 +614,38 @@ public class ListViewTests
 
             Assert.Fail(failureMessage);
         }
+
+        if (testCase.ExpectNoChangeNotifications)
+        {
+            Assert.Empty(testedListView.RaisedOnChangeNotifications);
+        }
+
+        if (testCase.ExpectedChangeNotifications.Any())
+        {
+            Assert.Equal(
+                testCase.ExpectedChangeNotifications,
+                testedListView.RaisedOnChangeNotifications);
+        }
     }
 
-    private static ListView<string> LoadListViewFromAsciiArt(string inputText)
+    private class TestListView<T> : ListView<T>
+        where T : class
+    {
+        private readonly List<T?> raisedOnChangeNotifications = new List<T?>();
+        public IReadOnlyList<T?> RaisedOnChangeNotifications => raisedOnChangeNotifications;
+
+        public TestListView(IReadOnlyList<T> originalItems, int scrollOffset, int pageSize, int? highlightedIndex, ListFilterPredicate<T> filterPredicate)
+            : base(originalItems, scrollOffset, pageSize, highlightedIndex, filterPredicate)
+        {
+        }
+
+        protected override void OnHighlightedItemChanged(T? item)
+        {
+            raisedOnChangeNotifications.Add(item);
+        }
+    }
+
+    private static TestListView<string> LoadListViewFromAsciiArt(string inputText)
     {
         var lines = inputText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
         var items = lines.Select(line => line.Trim(' ', '>', '|')).ToArray();
@@ -501,12 +653,12 @@ public class ListViewTests
         var scrollOffset = Array.FindIndex(lines, line => line.EndsWith("|"));
         var pageSize = lines.Count(line => line.EndsWith("|"));
 
-        return new ListView<string>(
+        return new TestListView<string>(
             items,
             scrollOffset,
             pageSize,
             highlightedIndex,
-            filterPredicate: (_, _) => true);
+            filterPredicate: (item, filter) => item.Contains(filter));
     }
 
     private static string SaveListViewAsAsciiArt(ListView<string> listView)

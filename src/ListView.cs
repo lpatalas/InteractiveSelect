@@ -3,16 +3,20 @@ using System.Collections.Generic;
 
 namespace InteractiveSelect;
 
+internal delegate bool ListFilterPredicate<T>(T item, string filter);
+
 internal class ListView<T>
     where T : class
 {
     private string filter = string.Empty;
-    private readonly Func<T, string, bool> filterPredicate;
+    private readonly ListFilterPredicate<T> filterPredicate;
     private readonly List<T> items;
     private readonly IReadOnlyList<T> originalItems;
     private readonly Action<T?>? highlightedItemChangedCallback;
 
     public T this[int index] => items[index];
+
+    public IReadOnlyList<T> Items => items;
 
     public int Count => items.Count;
     public string Filter { get => filter; set => SetFilter(value); }
@@ -26,7 +30,7 @@ internal class ListView<T>
     public ListView(
         IReadOnlyList<T> originalItems,
         int pageSize,
-        Func<T, string, bool> filterPredicate,
+        ListFilterPredicate<T> filterPredicate,
         Action<T?>? highlightedItemChangedCallback)
         : this(
               originalItems,
@@ -43,7 +47,7 @@ internal class ListView<T>
         int scrollOffset,
         int pageSize,
         int? highlightedIndex,
-        Func<T, string, bool> filterPredicate)
+        ListFilterPredicate<T> filterPredicate)
     {
         if (pageSize <= 0)
             throw new ArgumentOutOfRangeException(nameof(pageSize));
@@ -90,6 +94,11 @@ internal class ListView<T>
         }
 
         MaintainInvariants();
+
+        if (HighlightedItem != oldHighlightedItem)
+        {
+            OnHighlightedItemChanged(HighlightedItem);
+        }
     }
 
     public void HighlightPreviousItem()
@@ -123,8 +132,13 @@ internal class ListView<T>
 
         if (previousHighlightedItem != HighlightedItem)
         {
-            highlightedItemChangedCallback?.Invoke(HighlightedItem);
+            OnHighlightedItemChanged(HighlightedItem);
         }
+    }
+
+    protected virtual void OnHighlightedItemChanged(T? item)
+    {
+        highlightedItemChangedCallback?.Invoke(item);
     }
 
     private void MaintainInvariants()
