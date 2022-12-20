@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using FluentAssertions;
+using Xunit;
 
 namespace InteractiveSelect.Tests;
 
@@ -16,6 +17,6 @@ public class StringExtensionTests
     public void AddEllipsisTests(string input, int maxLength, string expected)
     {
         var result = input.AddEllipsis(maxLength);
-        Assert.Equal(expected, result);
+        result.Should().Be(expected);
     }
 }

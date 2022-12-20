@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using FluentAssertions;
+using Xunit;
 
 namespace InteractiveSelect.Tests;
 
@@ -20,6 +21,6 @@ public class EscapeSequenceTests
     public void TestParsing(string input, string expected)
     {
         var sequence = EscapeSequence.Parse(input);
-        Assert.Equal(expected, sequence.ToString());
+        sequence.ToString().Should().Be(expected);
     }
 }

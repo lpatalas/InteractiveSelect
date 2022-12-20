@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using FluentAssertions;
 using Xunit;
 
 namespace InteractiveSelect.Tests;
@@ -27,6 +28,7 @@ public class ScrollBarLayoutTests
         var layout = ScrollBarLayout.Compute(scrollBarSize, scrollOffset, pageSize, totalCount);
         var result = new StringBuilder();
         layout.Render(result, barChar: '-', thumbChar: 'X');
-        Assert.Equal(expected, result.ToString());
+
+        result.ToString().Should().Be(expected);
     }
 }

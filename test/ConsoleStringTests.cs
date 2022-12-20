@@ -1,6 +1,5 @@
-﻿using System.Management.Automation.Language;
+﻿using FluentAssertions;
 using Xunit;
-using static InteractiveSelect.Tests.ListViewTests;
 
 namespace InteractiveSelect.Tests;
 
@@ -15,11 +14,13 @@ public class ConsoleStringTests
         var plainTextString = ConsoleString.CreatePlainText(input);
         var styledString = ConsoleString.CreateStyled(input);
 
-        Assert.Equal(plainTextString, styledString);
-        Assert.Same(input, plainTextString.ToString());
-        Assert.Same(input, styledString.ToString());
-        Assert.Equal(input.Length, plainTextString.ContentLength);
-        Assert.Equal(input.Length, styledString.ContentLength);
+        styledString.Should().Be(plainTextString);
+
+        plainTextString.ToString().Should().BeSameAs(input);
+        styledString.ToString().Should().BeSameAs(input);
+
+        plainTextString.ContentLength.Should().Be(input.Length);
+        styledString.ContentLength.Should().Be(input.Length);
     }
 
     [Theory]
@@ -30,9 +31,9 @@ public class ConsoleStringTests
         var plainTextString = ConsoleString.CreatePlainText(input);
         var styledString = ConsoleString.CreateStyled(input);
 
-        Assert.Equal(plainTextString, styledString);
-        Assert.Equal(expected, plainTextString.ToString());
-        Assert.Equal(expected, styledString.ToString());
+        styledString.Should().Be(plainTextString);
+        plainTextString.ToString().Should().Be(expected);
+        styledString.ToString().Should().Be(expected);
     }
 
     [Theory]
@@ -41,9 +42,9 @@ public class ConsoleStringTests
     public void PlainTextShouldRemoveControlSequences(string input, string expected)
     {
         var plainTextString = ConsoleString.CreatePlainText(input);
-        
-        Assert.Equal(expected, plainTextString.ToString());
-        Assert.Equal(expected.Length, plainTextString.ContentLength);
+
+        plainTextString.ToString().Should().Be(expected);
+        plainTextString.ContentLength.Should().Be(expected.Length);
     }
 
     [Theory]
@@ -57,8 +58,8 @@ public class ConsoleStringTests
     {
         var styledString = ConsoleString.CreateStyled(input);
 
-        Assert.Equal(expected, styledString.ToString());
-        Assert.Equal(expectedContentLength, styledString.ContentLength);
+        styledString.ToString().Should().Be(expected);
+        styledString.ContentLength.Should().Be(expectedContentLength);
     }
 
     [Theory]
@@ -71,8 +72,9 @@ public class ConsoleStringTests
     public void ShouldHandleVariousEdgeCases(string input, string expected)
     {
         var plainTextString = ConsoleString.CreatePlainText(input);
-        Assert.Equal(expected, plainTextString.ToString());
-        Assert.Equal(expected.Length, plainTextString.ContentLength);
+
+        plainTextString.ToString().Should().Be(expected);
+        plainTextString.ContentLength.Should().Be(expected.Length);
     }
 
     [Theory]
@@ -89,7 +91,7 @@ public class ConsoleStringTests
         var styledString = ConsoleString.CreateStyled(input);
         var result = styledString.AddEllipsis(maxLength);
 
-        Assert.Equal(expected, result.ToString());
+        result.ToString().Should().Be(expected);
     }
 
     [Theory]
@@ -118,6 +120,7 @@ public class ConsoleStringTests
 
         var input = ConsoleString.CreatePlainText(inputString);
         var result = input.WordWrap(lineLength);
-        Assert.Equal(expected, result);
+
+        result.Should().BeEquivalentTo(expected);
     }
 }

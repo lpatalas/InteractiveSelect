@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using FluentAssertions;
 using Xunit;
 
 namespace InteractiveSelect.Tests;
@@ -24,8 +25,12 @@ partial class ListViewTests
         var testedListView = LoadListViewFromAsciiArt(testCase.Before);
         var expectedListView = LoadListViewFromAsciiArt(testCase.After);
 
+        // TODO: Fix parsing when "After" list view has less items than original
         //Trace.Assert(testedListView.OriginalItems.Count == expectedListView.OriginalItems.Count);
-        Trace.Assert(testedListView.PageSize == expectedListView.PageSize);
+
+        Trace.Assert(
+            testedListView.PageSize == expectedListView.PageSize,
+            "'Before' and 'After' list views should have the same page size");
 
         testCase.Action(testedListView);
 
@@ -50,14 +55,13 @@ partial class ListViewTests
 
         if (testCase.ExpectNoChangeNotifications)
         {
-            Assert.Empty(testedListView.RaisedOnChangeNotifications);
+            testedListView.RaisedOnChangeNotifications.Should().BeEmpty();
         }
 
         if (testCase.ExpectedChangeNotifications.Any())
         {
-            Assert.Equal(
-                testCase.ExpectedChangeNotifications,
-                testedListView.RaisedOnChangeNotifications);
+            testedListView.RaisedOnChangeNotifications
+                .Should().BeEquivalentTo(testCase.ExpectedChangeNotifications);
         }
     }
 
