@@ -1,5 +1,5 @@
 ﻿$DebugPreference = 'Continue'
-Import-Module "$PSScriptRoot\InteractiveSelect.dll"
+Import-Module "$PSScriptRoot\InteractiveSelect.psd1"
 
 $dir = Get-Item $pwd
 while ($dir.Parent -and (-not (Test-Path (Join-Path $dir "global.json")))) {
