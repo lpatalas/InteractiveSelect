@@ -1,4 +1,11 @@
 <Project>
+  <Import Project="Version.props" />
+
+  <PropertyGroup>
+    <AssemblyFileVersion>$(PSModuleVersion)</AssemblyFileVersion>
+    <AssemblyVersion>$(PSModuleVersion)</AssemblyVersion>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
