@@ -117,8 +117,8 @@ internal class ListPane
             int itemIndex = lineIndex + listItems.ScrollOffset;
             var backgroundColor = (listItems.HighlightedIndex == itemIndex) switch
             {
-                true => ConsoleString.CreateStyled(PSStyle.Instance.Background.Red),
-                false => ConsoleString.Empty
+                true => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted),
+                false => ConsoleString.CreateStyled(Theme.Instance.ItemNormal)
             };
 
             var text = itemIndex < listItems.Count

@@ -12,9 +12,19 @@ internal readonly ref struct EscapeSequence
 {
     private readonly ReadOnlySpan<char> chars;
 
-    public static EscapeSequence ShowCursor => new EscapeSequence($"\x1b[?25h");
-    public static EscapeSequence HideCursor => new EscapeSequence($"\x1b[?25l");
+    public static EscapeSequence Reset => new EscapeSequence("\x1b[0m");
+    public static EscapeSequence ShowCursor => new EscapeSequence("\x1b[?25h");
+    public static EscapeSequence HideCursor => new EscapeSequence("\x1b[?25l");
     public static EscapeSequence CursorUp(int cells) => new EscapeSequence($"\x1b[{cells}A");
+
+    public static EscapeSequence MakeColor(ConsoleColor foreground, ConsoleColor background)
+        => new EscapeSequence($"\x1b[{foreground.ToForegroundColorCode()};{background.ToBackgroundColorCode()}m");
+
+    public static EscapeSequence MakeForegroundColor(ConsoleColor color)
+        => new EscapeSequence($"\x1b[{color.ToForegroundColorCode()}m");
+
+    public static EscapeSequence MakeBackgroundColor(ConsoleColor color)
+        => new EscapeSequence($"\x1b[{color.ToBackgroundColorCode()}m");
 
     public EscapeSequenceCode Code => chars switch
     {

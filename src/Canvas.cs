@@ -37,11 +37,11 @@ internal class Canvas
     {
         string? style = isActive switch
         {
-            true => PSStyle.Instance.Foreground.BrightWhite,
-            false => PSStyle.Instance.Foreground.BrightBlack,
+            true => Theme.Instance.HeaderActive,
+            false => Theme.Instance.HeaderInactive,
         };
 
-        var borderStyle = PSStyle.Instance.Foreground.BrightBlack;
+        var borderStyle = Theme.Instance.Border;
 
         // initial dash and two spaces around caption
         var paddingLength = Width - text.ContentLength - 4;
@@ -73,7 +73,7 @@ internal class Canvas
         buffer.Append(text);
         if (text.ContentLength < lineWidth)
             buffer.Append(' ', lineWidth - text.ContentLength);
-        buffer.Append(PSStyle.Instance.Reset);
+        buffer.Append(EscapeSequence.Reset.ToString());
 
         hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
         hostUI.Write(buffer.ToString());

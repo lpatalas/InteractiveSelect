@@ -1,3 +1,6 @@
+[CmdletBinding()]
+param()
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -25,16 +28,22 @@ $modulePath = Join-Path $publishPath InteractiveSelect
 New-Item -Path $modulePath -ItemType Directory | Out-Null
 
 Copy-Item `
-    -LiteralPath (Join-Path $dotnetPublishPath InteractiveSelect.dll) `
-    -Destination $modulePath
+    -Path (Join-Path $dotnetPublishPath '*') `
+    -Destination $modulePath `
+    -Include InteractiveSelect.dll, InteractiveSelect.psd1
 
-$manifestProperties = & "$rootPath\ModuleManifest.ps1"
-$manifestPath = Join-Path $modulePath InteractiveSelect.psd1
-New-ModuleManifest `
-    -Path $manifestPath `
-    @manifestProperties
+$manifestInfo = Test-ModuleManifest -Path (Join-Path $modulePath InteractiveSelect.psd1)
+$manifestInfo | Format-List
 
-Test-ModuleManifest -Path $manifestPath
+$versionProps = [xml](Get-Content (Join-Path $rootPath Version.props))
+$expectedVersion = $versionProps.Project.PropertyGroup.PSModuleVersion
+if (-not $expectedVersion) {
+    throw "Can't get PSModuleVersion from Version.props"
+}
+
+if ($expectedVersion -ne $manifestInfo.Version) {
+    throw "Module version in psd1 ($($manifestInfo.Version)) does not match Version.props ($expectedVersion)"
+}
 
 Write-Host
 Write-Host "Module is ready in $modulePath" -ForegroundColor Green
