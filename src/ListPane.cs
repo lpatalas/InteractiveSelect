@@ -8,23 +8,31 @@ namespace InteractiveSelect;
 
 internal class ListPane
 {
+    private const int headerHeight = 1;
+    private const int scrollBarWidth = 1;
+
     private readonly ListView<ListItem> listItems;
     private readonly Action<PSObject?> highlightedItemChangedCallback;
 
     public PSObject? HighlightedObject => listItems.HighlightedItem?.Value;
+    public int Width { get; }
 
     public ListPane(
         IReadOnlyList<ListItem> listItems,
+        int maximumWidth,
         int height,
         Action<PSObject?> highlightedItemChangedCallback)
     {
-        var listPageSize = height - 1; // -1 to make space for header
+        var listPageSize = height - headerHeight;
         this.listItems = new ListView<ListItem>(
             listItems,
             listPageSize,
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase),
             listItem => highlightedItemChangedCallback(listItem?.Value));
         this.highlightedItemChangedCallback = highlightedItemChangedCallback;
+
+        int maxItemWidth = listItems.Max(x => x.Label.ContentLength);
+        Width = Math.Min(maxItemWidth + scrollBarWidth, maximumWidth);
     }
 
     public IEnumerable<PSObject?> GetSelectedObjects()
