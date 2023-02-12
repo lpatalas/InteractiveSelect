@@ -2,6 +2,18 @@
 
 namespace InteractiveSelect;
 
-internal record ListItem(ConsoleString Label, PSObject? Value)
+internal class ListItem
 {
+    public bool IsSelected { get; set; }
+    public ConsoleString Label { get; }
+    public PSObject? Value { get; }
+
+    public ListItem(ConsoleString label, PSObject? value)
+    {
+        Label = label;
+        Value = value;
+    }
+
+    public void ToggleSelection()
+        => IsSelected = !IsSelected;
 }

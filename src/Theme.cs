@@ -11,4 +11,5 @@ internal class Theme
     public string HeaderInactive { get; set; } = EscapeSequence.MakeForegroundColor(ConsoleColor.DarkGray);
     public string ItemNormal { get; set; } = string.Empty;
     public string ItemHighlighted { get; set; } = EscapeSequence.MakeBackgroundColor(ConsoleColor.DarkRed);
+    public string ItemSelected { get; set; } = EscapeSequence.MakeForegroundColor(ConsoleColor.Yellow);
 }

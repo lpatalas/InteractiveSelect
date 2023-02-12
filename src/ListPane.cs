@@ -37,8 +37,14 @@ internal class ListPane
 
     public IEnumerable<PSObject?> GetSelectedObjects()
     {
-        var highlightedItem = listItems.HighlightedItem;
-        if (highlightedItem is not null)
+        var selectedItems = listItems.Items
+            .Where(x => x.IsSelected)
+            .Select(x => x.Value)
+            .ToList();
+
+        if (selectedItems.Count > 0)
+            return selectedItems;
+        else if (listItems.HighlightedItem is ListItem highlightedItem)
             return new[] { highlightedItem.Value };
         else
             return Enumerable.Empty<PSObject?>();
@@ -77,6 +83,13 @@ internal class ListPane
                 if (!string.IsNullOrEmpty(listItems.Filter))
                     listItems.Filter = listItems.Filter.Substring(0, listItems.Filter.Length - 1);
                 return true;
+            case ConsoleKey.Spacebar:
+                if (listItems.HighlightedItem is ListItem highlightedItem)
+                {
+                    highlightedItem.ToggleSelection();
+                    return true;
+                }
+                return false;
             default:
                 if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
                 {
@@ -123,10 +136,17 @@ internal class ListPane
         for (int lineIndex = 0; lineIndex < listItems.PageSize; lineIndex++)
         {
             int itemIndex = lineIndex + listItems.ScrollOffset;
-            var backgroundColor = (listItems.HighlightedIndex == itemIndex) switch
+            var item = listItems.Items[itemIndex];
+
+            bool isHighlighted = listItems.HighlightedIndex == itemIndex;
+            bool isSelected = item.IsSelected;
+
+            var backgroundColor = (isHighlighted, isSelected) switch
             {
-                true => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted),
-                false => ConsoleString.CreateStyled(Theme.Instance.ItemNormal)
+                (true, true) => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted + Theme.Instance.ItemSelected),
+                (true, false) => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted),
+                (false, true) => ConsoleString.CreateStyled(Theme.Instance.ItemSelected),
+                (false, false) => ConsoleString.CreateStyled(Theme.Instance.ItemNormal)
             };
 
             var text = itemIndex < listItems.Count
