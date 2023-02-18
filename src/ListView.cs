@@ -185,4 +185,56 @@ internal class ListView<T>
             ScrollOffset = 0;
         }
     }
+
+    public void Draw(Canvas canvas, Func<T, ConsoleString> getLabel)
+    {
+        var itemsCanvas = canvas.GetSubArea(0, 0, canvas.Width - 1, canvas.Height);
+        var scrollBarCanvas = canvas.GetSubArea(canvas.Width - 1, 0, 1, canvas.Height);
+
+        DrawItems(itemsCanvas, getLabel);
+        DrawScrollBar(scrollBarCanvas);
+    }
+
+    private void DrawItems(Canvas canvas, Func<T, ConsoleString> getLabel)
+    {
+        int lineIndex = 0;
+
+        for (int itemIndex = lineIndex + ScrollOffset;
+            itemIndex < items.Count && lineIndex < PageSize;
+            itemIndex++, lineIndex++)
+        {
+            var item = items[itemIndex];
+
+            bool isHighlighted = HighlightedIndex == itemIndex;
+            bool isSelected = item.IsSelected;
+
+            var backgroundColor = (isHighlighted, isSelected) switch
+            {
+                (true, true) => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted + Theme.Instance.ItemSelected),
+                (true, false) => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted),
+                (false, true) => ConsoleString.CreateStyled(Theme.Instance.ItemSelected),
+                (false, false) => ConsoleString.CreateStyled(Theme.Instance.ItemNormal)
+            };
+
+            var text = getLabel(items[itemIndex].Item);
+            var line = ConsoleString.Concat(backgroundColor, text);
+            canvas.FillLine(lineIndex, line);
+        }
+
+        for (; lineIndex < PageSize; lineIndex++)
+        {
+            canvas.FillLine(lineIndex, ConsoleString.Empty);
+        }
+    }
+
+    private void DrawScrollBar(Canvas canvas)
+    {
+        var scrollBar = ScrollBarLayout.Compute(canvas.Height, ScrollOffset, PageSize, Count);
+
+        for (int i = 0; i < canvas.Height; i++)
+        {
+            var glyph = scrollBar.GetVerticalGlyph(i);
+            canvas.FillLine(i, ConsoleString.CreatePlainText(glyph.ToString()));
+        }
+    }
 }

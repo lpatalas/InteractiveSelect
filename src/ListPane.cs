@@ -105,7 +105,9 @@ internal class ListPane
     public void Draw(Canvas canvas, bool isActive)
     {
         DrawFilter(canvas, isActive);
-        DrawList(canvas.GetSubArea(0, 1, canvas.Width, canvas.Height - 1));
+
+        var listViewCanvas = canvas.GetSubArea(0, 1, canvas.Width, canvas.Height - 1);
+        listView.Draw(listViewCanvas, getLabel: item => item.Label);
     }
 
     private void DrawFilter(Canvas canvas, bool isActive)
@@ -120,56 +122,5 @@ internal class ListPane
         };
 
         canvas.DrawHeader(isActive, ConsoleString.CreatePlainText(filterText));
-    }
-
-    private void DrawList(Canvas canvas)
-    {
-        var itemsCanvas = canvas.GetSubArea(0, 0, canvas.Width - 1, canvas.Height);
-        var scrollBarCanvas = canvas.GetSubArea(canvas.Width - 1, 0, 1, canvas.Height);
-
-        DrawItems(itemsCanvas);
-        DrawScrollBar(scrollBarCanvas);
-    }
-
-    private void DrawItems(Canvas canvas)
-    {
-        for (int lineIndex = 0; lineIndex < listView.PageSize; lineIndex++)
-        {
-            int itemIndex = lineIndex + listView.ScrollOffset;
-            var item = listView.Items[itemIndex];
-
-            bool isHighlighted = listView.HighlightedIndex == itemIndex;
-            bool isSelected = item.IsSelected;
-
-            var backgroundColor = (isHighlighted, isSelected) switch
-            {
-                (true, true) => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted + Theme.Instance.ItemSelected),
-                (true, false) => ConsoleString.CreateStyled(Theme.Instance.ItemHighlighted),
-                (false, true) => ConsoleString.CreateStyled(Theme.Instance.ItemSelected),
-                (false, false) => ConsoleString.CreateStyled(Theme.Instance.ItemNormal)
-            };
-
-            var text = itemIndex < listView.Count
-                ? listView[itemIndex].Label
-                : ConsoleString.Empty;
-
-            var line = ConsoleString.Concat(backgroundColor, text);
-            canvas.FillLine(lineIndex, line);
-        }
-    }
-
-    private void DrawScrollBar(Canvas canvas)
-    {
-        var scrollBar = ScrollBarLayout.Compute(
-            canvas.Height,
-            listView.ScrollOffset,
-            listView.PageSize,
-            listView.Count);
-
-        for (int i = 0; i < canvas.Height; i++)
-        {
-            var glyph = scrollBar.GetVerticalGlyph(i);
-            canvas.FillLine(i, ConsoleString.CreatePlainText(glyph.ToString()));
-        }
     }
 }
