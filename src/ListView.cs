@@ -27,15 +27,6 @@ file class ListItem<T>
         Item = item;
     }
 
-    public override bool Equals(object? obj)
-        => ReferenceEquals(obj, this);
-
-    public override int GetHashCode()
-        => HashCode.Combine(this);
-
-    public override string ToString()
-        => nameof(ListItem<T>);
-
     public void ToggleSelection()
         => IsSelected = !IsSelected;
 }
@@ -57,7 +48,6 @@ internal class ListView<T>
 
     public int VisibleItemCount => items.Count;
     public int TotalItemCount => originalItems.Count;
-
     public string Filter { get => filter; set => SetFilter(value); }
 
     public ListView(
@@ -69,14 +59,14 @@ internal class ListView<T>
               originalItems,
               scrollOffset: 0,
               pageSize,
-              highlightedIndex: originalItems.Count > 0 ? 0 : null,
+              highlightedIndex: null,
               filterPredicate)
     {
         if (highlightedItemChangedCallback is not null)
             HighlightedItemChanged += (sender, e) => highlightedItemChangedCallback(e.Item);
     }
 
-    public ListView(
+    private ListView(
         IReadOnlyList<T> originalItems,
         int scrollOffset,
         int pageSize,
@@ -197,7 +187,6 @@ internal class ListView<T>
 
     protected virtual void OnHighlightedItemChanged(T? item)
     {
-        //highlightedItemChangedCallback?.Invoke(item);
         var handler = HighlightedItemChanged;
         if (handler is not null)
             handler(this, new HighlightedItemChangedEventArgs<T?>(item));
@@ -281,9 +270,13 @@ internal class ListView<T>
     {
         var lines = inputText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
         var items = lines.Select(line => line.Trim(' ', '>', '|')).ToArray();
-        var highlightedIndex = Array.FindIndex(lines, line => line.StartsWith(">"));
         var scrollOffset = Array.FindIndex(lines, line => line.EndsWith("|"));
         var pageSize = lines.Count(line => line.EndsWith("|"));
+        var highlightedIndex = Array.FindIndex(lines, line => line.StartsWith(">")) switch
+        {
+            var x when x >= 0 => x,
+            _ => (int?)null
+        };
 
         return new ListView<string>(
             items,

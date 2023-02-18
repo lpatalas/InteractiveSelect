@@ -9,11 +9,9 @@ namespace InteractiveSelect;
 internal class ListPane
 {
     private const int headerHeight = 1;
+    private readonly ListView<InputObject> listView;
     private const int scrollBarWidth = 1;
 
-    private readonly ListView<InputObject> listView;
-
-    //public PSObject? HighlightedObject => listView.HighlightedItemValue?.Value;
     public int Width { get; }
 
     public ListPane(
@@ -31,6 +29,11 @@ internal class ListPane
 
         int maxItemWidth = inputObjects.Max(x => x.Label.ContentLength);
         Width = Math.Min(maxItemWidth + scrollBarWidth, maximumWidth);
+    }
+
+    public void Initialize()
+    {
+        listView.HighlightFirstItem();
     }
 
     public IEnumerable<PSObject?> GetSelectedObjects()

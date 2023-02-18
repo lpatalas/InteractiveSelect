@@ -55,6 +55,8 @@ internal class MainWindow
     {
         var initialCursorPosition = ReserveBufferSpace(hostUI);
 
+        listPane.Initialize();
+
         var selectedObjects = Enumerable.Empty<PSObject?>();
         var isExiting = false;
         while (!isExiting)
