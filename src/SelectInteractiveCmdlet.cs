@@ -49,19 +49,19 @@ public class SelectInteractiveCmdlet : PSCmdlet
     protected override void ProcessRecord()
     {
         if (HasPipelineInput)
-            pipedItems.Add(CreateListItem(InputObject, pipedItems.Count));
+            pipedObjects.Add(CreateInputObject(InputObject, pipedObjects.Count));
     }
 
     protected override void EndProcessing()
     {
-        var listItems = HasPipelineInput switch
+        var inputObjects = HasPipelineInput switch
         {
-            true => pipedItems,
-            false when Items is not null => CreateListItemCollection(Items),
-            _ => Array.Empty<ListItem>()
+            true => pipedObjects,
+            false when Items is not null => CreateInputObjectCollection(Items),
+            _ => Array.Empty<InputObject>()
         };
         
-        if (listItems.Count > 0)
+        if (inputObjects.Count > 0)
         {
             bool didHideCursor = false;
 
@@ -85,7 +85,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
                 var mainWindow = new MainWindow(
                     Host.UI,
-                    listItems,
+                    inputObjects,
                     calculatedHeight.GetValueOrDefault(20),
                     Preview);
 
@@ -109,21 +109,21 @@ public class SelectInteractiveCmdlet : PSCmdlet
         }
     }
 
-    private readonly List<ListItem> pipedItems = new();
+    private readonly List<InputObject> pipedObjects = new();
 
-    private IReadOnlyList<ListItem> CreateListItemCollection(IReadOnlyList<PSObject?> inputItems)
+    private IReadOnlyList<InputObject> CreateInputObjectCollection(IReadOnlyList<PSObject?> inputItems)
     {
-        var result = new List<ListItem>(inputItems.Count);
+        var result = new List<InputObject>(inputItems.Count);
         for (int i = 0; i < inputItems.Count; i++)
-            result.Add(CreateListItem(inputItems[i], i));
+            result.Add(CreateInputObject(inputItems[i], i));
         return result;
     }
 
-    private ListItem CreateListItem(PSObject? inputItem, int itemIndex)
+    private InputObject CreateInputObject(PSObject? inputObject, int itemIndex)
     {
-        var rawText = GetItemText(inputItem, itemIndex);
+        var rawText = GetItemText(inputObject, itemIndex);
         var parsedText = ConsoleString.CreatePlainText(rawText);
-        return new ListItem(parsedText, inputItem);
+        return new InputObject(parsedText, inputObject);
     }
 
     private string GetItemText(PSObject? item, int itemIndex)

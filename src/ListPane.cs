@@ -11,40 +11,40 @@ internal class ListPane
     private const int headerHeight = 1;
     private const int scrollBarWidth = 1;
 
-    private readonly ListView<ListItem> listItems;
+    private readonly ListView<InputObject> listView;
     private readonly Action<PSObject?> highlightedItemChangedCallback;
 
-    public PSObject? HighlightedObject => listItems.HighlightedItem?.Value;
+    public PSObject? HighlightedObject => listView.HighlightedItem?.Value;
     public int Width { get; }
 
     public ListPane(
-        IReadOnlyList<ListItem> listItems,
+        IReadOnlyList<InputObject> inputObjects,
         int maximumWidth,
         int height,
         Action<PSObject?> highlightedItemChangedCallback)
     {
         var listPageSize = height - headerHeight;
-        this.listItems = new ListView<ListItem>(
-            listItems,
+        this.listView = new ListView<InputObject>(
+            inputObjects,
             listPageSize,
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase),
             listItem => highlightedItemChangedCallback(listItem?.Value));
         this.highlightedItemChangedCallback = highlightedItemChangedCallback;
 
-        int maxItemWidth = listItems.Max(x => x.Label.ContentLength);
+        int maxItemWidth = inputObjects.Max(x => x.Label.ContentLength);
         Width = Math.Min(maxItemWidth + scrollBarWidth, maximumWidth);
     }
 
     public IEnumerable<PSObject?> GetSelectedObjects()
     {
-        var selectedItems = listItems.Items
+        var selectedItems = listView.Items
             .Where(x => x.IsSelected)
             .Select(x => x.Value)
             .ToList();
 
         if (selectedItems.Count > 0)
             return selectedItems;
-        else if (listItems.HighlightedItem is ListItem highlightedItem)
+        else if (listView.HighlightedItem is InputObject highlightedItem)
             return new[] { highlightedItem.Value };
         else
             return Enumerable.Empty<PSObject?>();
@@ -55,36 +55,36 @@ internal class ListPane
         switch (keyInfo.Key)
         {
             case ConsoleKey.Escape:
-                if (!string.IsNullOrEmpty(listItems.Filter))
+                if (!string.IsNullOrEmpty(listView.Filter))
                 {
-                    listItems.Filter = string.Empty;
+                    listView.Filter = string.Empty;
                     return true;
                 }
                 break;
             case ConsoleKey.UpArrow:
-                listItems.SetHighlightedIndex(listItems.HighlightedIndex - 1);
+                listView.SetHighlightedIndex(listView.HighlightedIndex - 1);
                 return true;
             case ConsoleKey.DownArrow:
-                listItems.SetHighlightedIndex(listItems.HighlightedIndex + 1);
+                listView.SetHighlightedIndex(listView.HighlightedIndex + 1);
                 return true;
             case ConsoleKey.Home:
-                listItems.SetHighlightedIndex(0);
+                listView.SetHighlightedIndex(0);
                 return true;
             case ConsoleKey.End:
-                listItems.SetHighlightedIndex(listItems.Count - 1);
+                listView.SetHighlightedIndex(listView.Count - 1);
                 return true;
             case ConsoleKey.PageUp:
-                listItems.SetHighlightedIndex(listItems.HighlightedIndex - listItems.PageSize + 1);
+                listView.SetHighlightedIndex(listView.HighlightedIndex - listView.PageSize + 1);
                 return true;
             case ConsoleKey.PageDown:
-                listItems.SetHighlightedIndex(listItems.HighlightedIndex + listItems.PageSize - 1);
+                listView.SetHighlightedIndex(listView.HighlightedIndex + listView.PageSize - 1);
                 return true;
             case ConsoleKey.Backspace:
-                if (!string.IsNullOrEmpty(listItems.Filter))
-                    listItems.Filter = listItems.Filter.Substring(0, listItems.Filter.Length - 1);
+                if (!string.IsNullOrEmpty(listView.Filter))
+                    listView.Filter = listView.Filter.Substring(0, listView.Filter.Length - 1);
                 return true;
             case ConsoleKey.Spacebar:
-                if (listItems.HighlightedItem is ListItem highlightedItem)
+                if (listView.HighlightedItem is InputObject highlightedItem)
                 {
                     highlightedItem.ToggleSelection();
                     return true;
@@ -93,7 +93,7 @@ internal class ListPane
             default:
                 if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
                 {
-                    listItems.Filter = (listItems.Filter ?? "") + keyInfo.KeyChar;
+                    listView.Filter = (listView.Filter ?? "") + keyInfo.KeyChar;
                     return true;
                 }
                 break;
@@ -110,13 +110,13 @@ internal class ListPane
 
     private void DrawFilter(Canvas canvas, bool isActive)
     {
-        var totalCount = listItems.OriginalItems.Count;
-        var filteredCount = listItems.Count;
+        var totalCount = listView.OriginalItems.Count;
+        var filteredCount = listView.Count;
 
-        var filterText = listItems.Filter switch
+        var filterText = listView.Filter switch
         {
             null or "" => $"{filteredCount}/{totalCount}",
-            _ => $"{filteredCount}/{totalCount}> {listItems.Filter}"
+            _ => $"{filteredCount}/{totalCount}> {listView.Filter}"
         };
 
         canvas.DrawHeader(isActive, ConsoleString.CreatePlainText(filterText));
@@ -133,12 +133,12 @@ internal class ListPane
 
     private void DrawItems(Canvas canvas)
     {
-        for (int lineIndex = 0; lineIndex < listItems.PageSize; lineIndex++)
+        for (int lineIndex = 0; lineIndex < listView.PageSize; lineIndex++)
         {
-            int itemIndex = lineIndex + listItems.ScrollOffset;
-            var item = listItems.Items[itemIndex];
+            int itemIndex = lineIndex + listView.ScrollOffset;
+            var item = listView.Items[itemIndex];
 
-            bool isHighlighted = listItems.HighlightedIndex == itemIndex;
+            bool isHighlighted = listView.HighlightedIndex == itemIndex;
             bool isSelected = item.IsSelected;
 
             var backgroundColor = (isHighlighted, isSelected) switch
@@ -149,8 +149,8 @@ internal class ListPane
                 (false, false) => ConsoleString.CreateStyled(Theme.Instance.ItemNormal)
             };
 
-            var text = itemIndex < listItems.Count
-                ? listItems[itemIndex].Label
+            var text = itemIndex < listView.Count
+                ? listView[itemIndex].Label
                 : ConsoleString.Empty;
 
             var line = ConsoleString.Concat(backgroundColor, text);
@@ -162,9 +162,9 @@ internal class ListPane
     {
         var scrollBar = ScrollBarLayout.Compute(
             canvas.Height,
-            listItems.ScrollOffset,
-            listItems.PageSize,
-            listItems.Count);
+            listView.ScrollOffset,
+            listView.PageSize,
+            listView.Count);
 
         for (int i = 0; i < canvas.Height; i++)
         {

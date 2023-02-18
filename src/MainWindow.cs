@@ -26,7 +26,7 @@ internal class MainWindow
 
     public MainWindow(
         PSHostUserInterface hostUI,
-        IReadOnlyList<ListItem> listItems,
+        IReadOnlyList<InputObject> inputObjects,
         int height,
         PSPropertyExpression? previewExpression)
     {
@@ -45,7 +45,7 @@ internal class MainWindow
         };
 
         listPane = new ListPane(
-            listItems,
+            inputObjects,
             maxListPaneWidth,
             height,
             highlightedItemChangedCallback);

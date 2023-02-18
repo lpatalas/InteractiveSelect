@@ -2,13 +2,13 @@
 
 namespace InteractiveSelect;
 
-internal class ListItem
+internal class InputObject
 {
     public bool IsSelected { get; set; }
     public ConsoleString Label { get; }
     public PSObject? Value { get; }
 
-    public ListItem(ConsoleString label, PSObject? value)
+    public InputObject(ConsoleString label, PSObject? value)
     {
         Label = label;
         Value = value;
