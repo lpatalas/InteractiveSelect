@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using FluentAssertions;
 using Xunit;
 
@@ -25,23 +24,20 @@ partial class ListViewTests
             !testCase.ExpectNoChangeNotifications || !testCase.ExpectedChangeNotifications.Any(),
             $"{nameof(testCase.ExpectNoChangeNotifications)} and {nameof(testCase.ExpectedChangeNotifications)} can't be both set at the same time");
 
-        var testedListView = LoadListViewFromAsciiArt(testCase.Before);
-        var expectedListView = LoadListViewFromAsciiArt(testCase.After);
+        var testedListView = ListView<string>.FromAsciiArt(testCase.Before);
+        var expectedListView = ListView<string>.FromAsciiArt(testCase.After);
+
+        List<string?> raisedOnChangeNotifications = new List<string?>();
+        testedListView.HighlightedItemChanged += (_, e) => raisedOnChangeNotifications.Add(e.Item);
 
         // TODO: Fix parsing when "After" list view has less items than original
         //Trace.Assert(testedListView.OriginalItems.Count == expectedListView.OriginalItems.Count);
 
-        Trace.Assert(
-            testedListView.PageSize == expectedListView.PageSize,
-            "'Before' and 'After' list views should have the same page size");
-
         testCase.Action(testedListView);
 
-        if (testedListView.ScrollOffset != expectedListView.ScrollOffset
-            || testedListView.HighlightedIndex != expectedListView.HighlightedIndex
-            || !testedListView.Items.SequenceEqual(expectedListView.Items))
+        if (!testedListView.HasSameVisibleItems(expectedListView))
         {
-            var actualResult = SaveListViewAsAsciiArt(testedListView);
+            var actualResult = testedListView.ToAsciiArt();
 
             var failureMessage = $"""
                 Expected list view to be:
@@ -58,67 +54,13 @@ partial class ListViewTests
 
         if (testCase.ExpectNoChangeNotifications)
         {
-            testedListView.RaisedOnChangeNotifications.Should().BeEmpty();
+            raisedOnChangeNotifications.Should().BeEmpty();
         }
 
         if (testCase.ExpectedChangeNotifications.Any())
         {
-            testedListView.RaisedOnChangeNotifications
+            raisedOnChangeNotifications
                 .Should().BeEquivalentTo(testCase.ExpectedChangeNotifications);
         }
-    }
-
-    private class TestListView<T> : ListView<T>
-        where T : class
-    {
-        private readonly List<T?> raisedOnChangeNotifications = new List<T?>();
-        public IReadOnlyList<T?> RaisedOnChangeNotifications => raisedOnChangeNotifications;
-
-        public TestListView(IReadOnlyList<T> originalItems, int scrollOffset, int pageSize, int? highlightedIndex, ListFilterPredicate<T> filterPredicate)
-            : base(originalItems, scrollOffset, pageSize, highlightedIndex, filterPredicate)
-        {
-        }
-
-        protected override void OnHighlightedItemChanged(T? item)
-        {
-            raisedOnChangeNotifications.Add(item);
-        }
-    }
-
-    private static TestListView<string> LoadListViewFromAsciiArt(string inputText)
-    {
-        var lines = inputText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-        var items = lines.Select(line => line.Trim(' ', '>', '|')).ToArray();
-        var highlightedIndex = Array.FindIndex(lines, line => line.StartsWith(">"));
-        var scrollOffset = Array.FindIndex(lines, line => line.EndsWith("|"));
-        var pageSize = lines.Count(line => line.EndsWith("|"));
-
-        return new TestListView<string>(
-            items,
-            scrollOffset,
-            pageSize,
-            highlightedIndex,
-            filterPredicate: (item, filter) => item.Contains(filter));
-    }
-
-    private static string SaveListViewAsAsciiArt(ListView<string> listView)
-    {
-        var result = new StringBuilder();
-        for (int i = 0; i < listView.OriginalItems.Count; i++)
-        {
-            if (i == listView.HighlightedIndex)
-                result.Append("> ");
-            else
-                result.Append("  ");
-
-            result.Append(listView.OriginalItems[i]);
-
-            if (i >= listView.ScrollOffset && i < listView.ScrollOffset + listView.PageSize)
-                result.Append(" |");
-
-            result.AppendLine();
-        }
-
-        return result.ToString();
     }
 }

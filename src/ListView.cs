@@ -1,10 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace InteractiveSelect;
 
 internal delegate bool ListFilterPredicate<T>(T item, string filter);
+
+internal class HighlightedItemChangedEventArgs<T> : EventArgs
+{
+    public T Item { get; }
+
+    public HighlightedItemChangedEventArgs(T item)
+    {
+        Item = item;
+    }
+}
 
 file class ListItem<T>
 {
@@ -34,23 +45,20 @@ internal class ListView<T>
 {
     private string filter = string.Empty;
     private readonly ListFilterPredicate<T> filterPredicate;
+    private int? highlightedIndex;
     private readonly List<ListItem<T>> items;
     private readonly IReadOnlyList<ListItem<T>> originalItems;
-    private readonly Action<T?>? highlightedItemChangedCallback;
+    private readonly int pageSize;
+    private int scrollOffset;
 
-    public IReadOnlyList<T> Items => items.Select(x => x.Item).ToList();
+    private ListItem<T>? HighlightedItem => highlightedIndex.HasValue ? items[highlightedIndex.Value] : default;
+
+    public event EventHandler<HighlightedItemChangedEventArgs<T?>>? HighlightedItemChanged;
 
     public int VisibleItemCount => items.Count;
     public int TotalItemCount => originalItems.Count;
 
     public string Filter { get => filter; set => SetFilter(value); }
-    public int? HighlightedIndex { get; private set; }
-    public int PageSize { get; }
-    public int ScrollOffset { get; private set; }
-
-    private ListItem<T>? HighlightedItem => HighlightedIndex.HasValue ? items[HighlightedIndex.Value] : default;
-
-    public IReadOnlyList<T> OriginalItems => originalItems.Select(x => x.Item).ToList();
 
     public ListView(
         IReadOnlyList<T> originalItems,
@@ -64,7 +72,8 @@ internal class ListView<T>
               highlightedIndex: originalItems.Count > 0 ? 0 : null,
               filterPredicate)
     {
-        this.highlightedItemChangedCallback = highlightedItemChangedCallback;
+        if (highlightedItemChangedCallback is not null)
+            HighlightedItemChanged += (sender, e) => highlightedItemChangedCallback(e.Item);
     }
 
     public ListView(
@@ -87,9 +96,9 @@ internal class ListView<T>
         this.items = new List<ListItem<T>>(this.originalItems);
         this.filterPredicate = filterPredicate;
 
-        HighlightedIndex = highlightedIndex;
-        PageSize = Math.Min(items.Count, pageSize);
-        ScrollOffset = scrollOffset;
+        this.highlightedIndex = highlightedIndex;
+        this.pageSize = Math.Min(items.Count, pageSize);
+        this.scrollOffset = scrollOffset;
     }
 
     public IEnumerable<T> GetSelectedItems()
@@ -104,6 +113,14 @@ internal class ListView<T>
             return new[] { highlightedItem.Item };
         else
             return Enumerable.Empty<T>();
+    }
+
+    public bool HasSameVisibleItems(ListView<T> other)
+    {
+        return pageSize == other.pageSize
+            && scrollOffset == other.scrollOffset
+            && highlightedIndex == other.highlightedIndex
+            && items.Select(i => i.Item).SequenceEqual(other.items.Select(i => i.Item));
     }
 
     private void SetFilter(string filter)
@@ -129,7 +146,7 @@ internal class ListView<T>
         if (oldHighlightedItem != null)
         {
             int newHighlightedIndex = items.IndexOf(oldHighlightedItem);
-            HighlightedIndex = newHighlightedIndex >= 0 ? newHighlightedIndex : null;
+            highlightedIndex = newHighlightedIndex >= 0 ? newHighlightedIndex : null;
         }
 
         MaintainInvariants();
@@ -141,16 +158,16 @@ internal class ListView<T>
     }
 
     public void HighlightPreviousItem()
-        => SetHighlightedIndex(HighlightedIndex - 1);
+        => SetHighlightedIndex(highlightedIndex - 1);
 
     public void HighlightNextItem()
-        => SetHighlightedIndex(HighlightedIndex + 1);
+        => SetHighlightedIndex(highlightedIndex + 1);
 
     public void HighlightItemPageUp()
-        => SetHighlightedIndex(HighlightedIndex - PageSize + 1);
+        => SetHighlightedIndex(highlightedIndex - pageSize + 1);
 
     public void HighlightItemPageDown()
-        => SetHighlightedIndex(HighlightedIndex + PageSize - 1);
+        => SetHighlightedIndex(highlightedIndex + pageSize - 1);
 
     public void HighlightFirstItem()
         => SetHighlightedIndex(items.Count > 0 ? 0 : null);
@@ -166,9 +183,9 @@ internal class ListView<T>
         var previousHighlightedItem = HighlightedItem;
 
         if (items.Count > 0 && newIndex.HasValue)
-            HighlightedIndex = Math.Clamp(newIndex.Value, 0, items.Count - 1);
+            highlightedIndex = Math.Clamp(newIndex.Value, 0, items.Count - 1);
         else
-            HighlightedIndex = null;
+            highlightedIndex = null;
 
         MaintainInvariants();
 
@@ -180,28 +197,31 @@ internal class ListView<T>
 
     protected virtual void OnHighlightedItemChanged(T? item)
     {
-        highlightedItemChangedCallback?.Invoke(item);
+        //highlightedItemChangedCallback?.Invoke(item);
+        var handler = HighlightedItemChanged;
+        if (handler is not null)
+            handler(this, new HighlightedItemChangedEventArgs<T?>(item));
     }
 
     private void MaintainInvariants()
     {
         if (items.Count > 0)
         {
-            if (!HighlightedIndex.HasValue)
-                HighlightedIndex = 0;
+            if (!highlightedIndex.HasValue)
+                highlightedIndex = 0;
 
-            if (HighlightedIndex < ScrollOffset)
-                ScrollOffset = HighlightedIndex.Value;
-            else if (HighlightedIndex >= ScrollOffset + PageSize)
-                ScrollOffset = HighlightedIndex.Value - PageSize + 1;
+            if (highlightedIndex < scrollOffset)
+                scrollOffset = highlightedIndex.Value;
+            else if (highlightedIndex >= scrollOffset + pageSize)
+                scrollOffset = highlightedIndex.Value - pageSize + 1;
 
-            if (ScrollOffset + PageSize > items.Count)
-                ScrollOffset = Math.Max(0, items.Count - PageSize);
+            if (scrollOffset + pageSize > items.Count)
+                scrollOffset = Math.Max(0, items.Count - pageSize);
         }
         else
         {
-            HighlightedIndex = null;
-            ScrollOffset = 0;
+            highlightedIndex = null;
+            scrollOffset = 0;
         }
     }
 
@@ -218,13 +238,13 @@ internal class ListView<T>
     {
         int lineIndex = 0;
 
-        for (int itemIndex = lineIndex + ScrollOffset;
-            itemIndex < items.Count && lineIndex < PageSize;
+        for (int itemIndex = lineIndex + scrollOffset;
+            itemIndex < items.Count && lineIndex < pageSize;
             itemIndex++, lineIndex++)
         {
             var item = items[itemIndex];
 
-            bool isHighlighted = HighlightedIndex == itemIndex;
+            bool isHighlighted = highlightedIndex == itemIndex;
             bool isSelected = item.IsSelected;
 
             var backgroundColor = (isHighlighted, isSelected) switch
@@ -240,7 +260,7 @@ internal class ListView<T>
             canvas.FillLine(lineIndex, line);
         }
 
-        for (; lineIndex < PageSize; lineIndex++)
+        for (; lineIndex < pageSize; lineIndex++)
         {
             canvas.FillLine(lineIndex, ConsoleString.Empty);
         }
@@ -248,12 +268,49 @@ internal class ListView<T>
 
     private void DrawScrollBar(Canvas canvas)
     {
-        var scrollBar = ScrollBarLayout.Compute(canvas.Height, ScrollOffset, PageSize, items.Count);
+        var scrollBar = ScrollBarLayout.Compute(canvas.Height, scrollOffset, pageSize, items.Count);
 
         for (int i = 0; i < canvas.Height; i++)
         {
             var glyph = scrollBar.GetVerticalGlyph(i);
             canvas.FillLine(i, ConsoleString.CreatePlainText(glyph.ToString()));
         }
+    }
+
+    public static ListView<string> FromAsciiArt(string inputText)
+    {
+        var lines = inputText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        var items = lines.Select(line => line.Trim(' ', '>', '|')).ToArray();
+        var highlightedIndex = Array.FindIndex(lines, line => line.StartsWith(">"));
+        var scrollOffset = Array.FindIndex(lines, line => line.EndsWith("|"));
+        var pageSize = lines.Count(line => line.EndsWith("|"));
+
+        return new ListView<string>(
+            items,
+            scrollOffset,
+            pageSize,
+            highlightedIndex,
+            filterPredicate: (item, filter) => item.Contains(filter));
+    }
+
+    public string ToAsciiArt()
+    {
+        var result = new StringBuilder();
+        for (int i = 0; i < originalItems.Count; i++)
+        {
+            if (i == highlightedIndex)
+                result.Append("> ");
+            else
+                result.Append("  ");
+
+            result.Append(originalItems[i].Item);
+
+            if (i >= scrollOffset && i < scrollOffset + pageSize)
+                result.Append(" |");
+
+            result.AppendLine();
+        }
+
+        return result.ToString();
     }
 }
