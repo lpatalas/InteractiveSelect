@@ -12,9 +12,8 @@ internal class ListPane
     private const int scrollBarWidth = 1;
 
     private readonly ListView<InputObject> listView;
-    private readonly Action<PSObject?> highlightedItemChangedCallback;
 
-    public PSObject? HighlightedObject => listView.HighlightedItemValue?.Value;
+    //public PSObject? HighlightedObject => listView.HighlightedItemValue?.Value;
     public int Width { get; }
 
     public ListPane(
@@ -29,7 +28,6 @@ internal class ListPane
             listPageSize,
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase),
             listItem => highlightedItemChangedCallback(listItem?.Value));
-        this.highlightedItemChangedCallback = highlightedItemChangedCallback;
 
         int maxItemWidth = inputObjects.Max(x => x.Label.ContentLength);
         Width = Math.Min(maxItemWidth + scrollBarWidth, maximumWidth);
@@ -37,17 +35,7 @@ internal class ListPane
 
     public IEnumerable<PSObject?> GetSelectedObjects()
     {
-        var selectedItems = listView.Items
-            .Where(x => x.IsSelected)
-            .Select(x => x.Value)
-            .ToList();
-
-        if (selectedItems.Count > 0)
-            return selectedItems;
-        else if (listView.HighlightedItemValue is InputObject highlightedItem)
-            return new[] { highlightedItem.Value };
-        else
-            return Enumerable.Empty<PSObject?>();
+        return listView.GetSelectedItems().Select(item => item.Value);
     }
 
     public bool HandleKey(ConsoleKeyInfo keyInfo)
@@ -62,22 +50,22 @@ internal class ListPane
                 }
                 break;
             case ConsoleKey.UpArrow:
-                listView.SetHighlightedIndex(listView.HighlightedIndex - 1);
+                listView.HighlightPreviousItem();
                 return true;
             case ConsoleKey.DownArrow:
-                listView.SetHighlightedIndex(listView.HighlightedIndex + 1);
+                listView.HighlightNextItem();
                 return true;
             case ConsoleKey.Home:
-                listView.SetHighlightedIndex(0);
+                listView.HighlightFirstItem();
                 return true;
             case ConsoleKey.End:
-                listView.SetHighlightedIndex(listView.Count - 1);
+                listView.HighlightLastItem();
                 return true;
             case ConsoleKey.PageUp:
-                listView.SetHighlightedIndex(listView.HighlightedIndex - listView.PageSize + 1);
+                listView.HighlightItemPageUp();
                 return true;
             case ConsoleKey.PageDown:
-                listView.SetHighlightedIndex(listView.HighlightedIndex + listView.PageSize - 1);
+                listView.HighlightItemPageDown();
                 return true;
             case ConsoleKey.Backspace:
                 if (!string.IsNullOrEmpty(listView.Filter))

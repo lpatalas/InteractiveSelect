@@ -32,12 +32,6 @@ internal class MainWindow
     {
         this.height = height;
 
-        Action<PSObject?> highlightedItemChangedCallback = previewPane switch
-        {
-            { } => previewPane.SetPreviewedObject,
-            null => _ => { }
-        };
-
         int maxListPaneWidth = previewExpression switch
         {
             null => hostUI.RawUI.WindowSize.Width,
@@ -48,7 +42,7 @@ internal class MainWindow
             inputObjects,
             maxListPaneWidth,
             height,
-            highlightedItemChangedCallback);
+            OnHighlightedListItemChanged);
 
         if (previewExpression != null)
         {
@@ -60,8 +54,6 @@ internal class MainWindow
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
     {
         var initialCursorPosition = ReserveBufferSpace(hostUI);
-
-        previewPane?.SetPreviewedObject(listPane.HighlightedObject);
 
         var selectedObjects = Enumerable.Empty<PSObject?>();
         var isExiting = false;
@@ -108,6 +100,11 @@ internal class MainWindow
             return listPane.HandleKey(keyInfo);
         else
             return previewPane?.HandleKey(keyInfo) ?? false;
+    }
+
+    private void OnHighlightedListItemChanged(PSObject? selectedItem)
+    {
+        previewPane?.SetPreviewedObject(selectedItem);
     }
 
     private Coordinates ReserveBufferSpace(PSHostUserInterface hostUI)

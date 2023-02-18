@@ -35,8 +35,6 @@ internal class ListView<T>
     private readonly IReadOnlyList<ListItem<T>> originalItems;
     private readonly Action<T?>? highlightedItemChangedCallback;
 
-    public T this[int index] => items[index].Item;
-
     public IReadOnlyList<T> Items => items.Select(x => x.Item).ToList();
 
     public int Count => items.Count;
@@ -88,6 +86,20 @@ internal class ListView<T>
         HighlightedIndex = highlightedIndex;
         PageSize = Math.Min(items.Count, pageSize);
         ScrollOffset = scrollOffset;
+    }
+
+    public IEnumerable<T> GetSelectedItems()
+    {
+        var selectedItems = items
+            .Where(item => item.IsSelected)
+            .Select(item => item.Item);
+
+        if (selectedItems.Any())
+            return selectedItems;
+        else if (HighlightedItem is ListItem<T> highlightedItem)
+            return new[] { highlightedItem.Item };
+        else
+            return Enumerable.Empty<T>();
     }
 
     private void SetFilter(string filter)
@@ -142,7 +154,7 @@ internal class ListView<T>
     public void HighlightLastItem()
         => SetHighlightedIndex(items.Count > 0 ? items.Count - 1 : null);
 
-    public void SetHighlightedIndex(int? newIndex)
+    private void SetHighlightedIndex(int? newIndex)
     {
         var previousHighlightedItem = HighlightedItemValue;
 
