@@ -14,7 +14,7 @@ internal class ListPane
     private readonly ListView<InputObject> listView;
     private readonly Action<PSObject?> highlightedItemChangedCallback;
 
-    public PSObject? HighlightedObject => listView.HighlightedItem?.Value;
+    public PSObject? HighlightedObject => listView.HighlightedItemValue?.Value;
     public int Width { get; }
 
     public ListPane(
@@ -44,7 +44,7 @@ internal class ListPane
 
         if (selectedItems.Count > 0)
             return selectedItems;
-        else if (listView.HighlightedItem is InputObject highlightedItem)
+        else if (listView.HighlightedItemValue is InputObject highlightedItem)
             return new[] { highlightedItem.Value };
         else
             return Enumerable.Empty<PSObject?>();
@@ -84,7 +84,7 @@ internal class ListPane
                     listView.Filter = listView.Filter.Substring(0, listView.Filter.Length - 1);
                 return true;
             case ConsoleKey.Spacebar:
-                if (listView.HighlightedItem is InputObject highlightedItem)
+                if (listView.HighlightedItemValue is InputObject highlightedItem)
                 {
                     highlightedItem.ToggleSelection();
                     return true;

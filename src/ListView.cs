@@ -6,27 +6,49 @@ namespace InteractiveSelect;
 
 internal delegate bool ListFilterPredicate<T>(T item, string filter);
 
+file class ListItem<T>
+{
+    public bool IsSelected { get; set; }
+    public T Item { get; }
+
+    public ListItem(T item)
+    {
+        Item = item;
+    }
+
+    public override bool Equals(object? obj)
+        => ReferenceEquals(obj, this);
+
+    public override int GetHashCode()
+        => HashCode.Combine(this);
+
+    public override string ToString()
+        => nameof(ListItem<T>);
+}
+
 internal class ListView<T>
     where T : class
 {
     private string filter = string.Empty;
     private readonly ListFilterPredicate<T> filterPredicate;
-    private readonly List<T> items;
-    private readonly IReadOnlyList<T> originalItems;
+    private readonly List<ListItem<T>> items;
+    private readonly IReadOnlyList<ListItem<T>> originalItems;
     private readonly Action<T?>? highlightedItemChangedCallback;
 
-    public T this[int index] => items[index];
+    public T this[int index] => items[index].Item;
 
-    public IReadOnlyList<T> Items => items;
+    public IReadOnlyList<T> Items => items.Select(x => x.Item).ToList();
 
     public int Count => items.Count;
     public string Filter { get => filter; set => SetFilter(value); }
     public int? HighlightedIndex { get; private set; }
-    public T? HighlightedItem => HighlightedIndex.HasValue ? items[HighlightedIndex.Value] : default;
+    public T? HighlightedItemValue => HighlightedIndex.HasValue ? items[HighlightedIndex.Value].Item : default;
     public int PageSize { get; }
     public int ScrollOffset { get; private set; }
 
-    public IReadOnlyList<T> OriginalItems => originalItems;
+    private ListItem<T>? HighlightedItem => HighlightedIndex.HasValue ? items[HighlightedIndex.Value] : default;
+
+    public IReadOnlyList<T> OriginalItems => originalItems.Select(x => x.Item).ToList();
 
     public ListView(
         IReadOnlyList<T> originalItems,
@@ -59,8 +81,8 @@ internal class ListView<T>
         if (highlightedIndex < 0 || highlightedIndex >= originalItems.Count)
             throw new ArgumentOutOfRangeException(nameof(highlightedIndex));
 
-        items = new List<T>(originalItems);
-        this.originalItems = originalItems;
+        this.originalItems = originalItems.Select(x => new ListItem<T>(x)).ToList();
+        this.items = new List<ListItem<T>>(this.originalItems);
         this.filterPredicate = filterPredicate;
 
         HighlightedIndex = highlightedIndex;
@@ -79,7 +101,7 @@ internal class ListView<T>
         {
             foreach (var item in originalItems)
             {
-                if (filterPredicate(item, filter))
+                if (filterPredicate(item.Item, filter))
                     items.Add(item);
             }
         }
@@ -98,7 +120,7 @@ internal class ListView<T>
 
         if (HighlightedItem != oldHighlightedItem)
         {
-            OnHighlightedItemChanged(HighlightedItem);
+            OnHighlightedItemChanged(HighlightedItemValue);
         }
     }
 
@@ -122,7 +144,7 @@ internal class ListView<T>
 
     public void SetHighlightedIndex(int? newIndex)
     {
-        var previousHighlightedItem = HighlightedItem;
+        var previousHighlightedItem = HighlightedItemValue;
 
         if (items.Count > 0 && newIndex.HasValue)
             HighlightedIndex = Math.Clamp(newIndex.Value, 0, items.Count - 1);
@@ -131,9 +153,9 @@ internal class ListView<T>
 
         MaintainInvariants();
 
-        if (previousHighlightedItem != HighlightedItem)
+        if (previousHighlightedItem != HighlightedItemValue)
         {
-            OnHighlightedItemChanged(HighlightedItem);
+            OnHighlightedItemChanged(HighlightedItemValue);
         }
     }
 
