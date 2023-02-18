@@ -72,12 +72,8 @@ internal class ListPane
                     listView.Filter = listView.Filter.Substring(0, listView.Filter.Length - 1);
                 return true;
             case ConsoleKey.Spacebar:
-                if (listView.HighlightedItemValue is InputObject highlightedItem)
-                {
-                    highlightedItem.ToggleSelection();
-                    return true;
-                }
-                return false;
+                listView.ToggleSelection();
+                return true;
             default:
                 if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
                 {
@@ -100,8 +96,8 @@ internal class ListPane
 
     private void DrawFilter(Canvas canvas, bool isActive)
     {
-        var totalCount = listView.OriginalItems.Count;
-        var filteredCount = listView.Count;
+        var totalCount = listView.TotalItemCount;
+        var filteredCount = listView.VisibleItemCount;
 
         var filterText = listView.Filter switch
         {

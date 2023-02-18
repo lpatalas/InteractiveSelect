@@ -24,6 +24,9 @@ file class ListItem<T>
 
     public override string ToString()
         => nameof(ListItem<T>);
+
+    public void ToggleSelection()
+        => IsSelected = !IsSelected;
 }
 
 internal class ListView<T>
@@ -37,10 +40,11 @@ internal class ListView<T>
 
     public IReadOnlyList<T> Items => items.Select(x => x.Item).ToList();
 
-    public int Count => items.Count;
+    public int VisibleItemCount => items.Count;
+    public int TotalItemCount => originalItems.Count;
+
     public string Filter { get => filter; set => SetFilter(value); }
     public int? HighlightedIndex { get; private set; }
-    public T? HighlightedItemValue => HighlightedIndex.HasValue ? items[HighlightedIndex.Value].Item : default;
     public int PageSize { get; }
     public int ScrollOffset { get; private set; }
 
@@ -132,7 +136,7 @@ internal class ListView<T>
 
         if (HighlightedItem != oldHighlightedItem)
         {
-            OnHighlightedItemChanged(HighlightedItemValue);
+            OnHighlightedItemChanged(HighlightedItem?.Item);
         }
     }
 
@@ -154,9 +158,12 @@ internal class ListView<T>
     public void HighlightLastItem()
         => SetHighlightedIndex(items.Count > 0 ? items.Count - 1 : null);
 
+    public void ToggleSelection()
+        => HighlightedItem?.ToggleSelection();
+
     private void SetHighlightedIndex(int? newIndex)
     {
-        var previousHighlightedItem = HighlightedItemValue;
+        var previousHighlightedItem = HighlightedItem;
 
         if (items.Count > 0 && newIndex.HasValue)
             HighlightedIndex = Math.Clamp(newIndex.Value, 0, items.Count - 1);
@@ -165,9 +172,9 @@ internal class ListView<T>
 
         MaintainInvariants();
 
-        if (previousHighlightedItem != HighlightedItemValue)
+        if (previousHighlightedItem != HighlightedItem)
         {
-            OnHighlightedItemChanged(HighlightedItemValue);
+            OnHighlightedItemChanged(HighlightedItem?.Item);
         }
     }
 
@@ -241,7 +248,7 @@ internal class ListView<T>
 
     private void DrawScrollBar(Canvas canvas)
     {
-        var scrollBar = ScrollBarLayout.Compute(canvas.Height, ScrollOffset, PageSize, Count);
+        var scrollBar = ScrollBarLayout.Compute(canvas.Height, ScrollOffset, PageSize, items.Count);
 
         for (int i = 0; i < canvas.Height; i++)
         {
