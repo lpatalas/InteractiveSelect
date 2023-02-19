@@ -32,7 +32,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightNextItem(),
+                    listView.HighlightNextItem(toggleSelection : false),
 
                 After = """
                       ItemA |
@@ -51,7 +51,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightNextItem(),
+                    listView.HighlightNextItem(toggleSelection: false),
 
                 After = """
                       ItemA
@@ -71,7 +71,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightNextItem(),
+                    listView.HighlightNextItem(toggleSelection: false),
 
                 After = """
                       ItemA
@@ -100,7 +100,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightPreviousItem(),
+                    listView.HighlightPreviousItem(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -119,7 +119,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightPreviousItem(),
+                    listView.HighlightPreviousItem(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -139,7 +139,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightPreviousItem(),
+                    listView.HighlightPreviousItem(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -169,7 +169,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightFirstItem(),
+                    listView.HighlightFirstItem(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -190,7 +190,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightFirstItem(),
+                    listView.HighlightFirstItem(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -202,7 +202,7 @@ public partial class ListViewTests
                 ExpectedChangeNotifications = { "ItemA" }
             },
 
-            new Scenario("Do nothing when the first item is already selected")
+            new Scenario("Do nothing when the first item is already highlighted")
             {
                 Before = """
                     > ItemA |
@@ -212,7 +212,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightFirstItem(),
+                    listView.HighlightFirstItem(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -243,7 +243,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightLastItem(),
+                    listView.HighlightLastItem(toggleSelection: false),
 
                 After = """
                       ItemA
@@ -264,7 +264,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightLastItem(),
+                    listView.HighlightLastItem(toggleSelection : false),
 
                 After = """
                       ItemA
@@ -276,7 +276,7 @@ public partial class ListViewTests
                 ExpectedChangeNotifications = { "ItemD" }
             },
 
-            new Scenario("Do nothing when the last item is already selected")
+            new Scenario("Do nothing when the last item is already highlighted")
             {
                 Before = """
                       ItemA
@@ -286,7 +286,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightLastItem(),
+                    listView.HighlightLastItem(toggleSelection : false),
 
                 After = """
                       ItemA
@@ -317,7 +317,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageDown(),
+                    listView.HighlightItemPageDown(toggleSelection: false),
 
                 After = """
                       ItemA |
@@ -339,7 +339,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageDown(),
+                    listView.HighlightItemPageDown(toggleSelection: false),
 
                 After = """
                       ItemA
@@ -363,7 +363,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageDown(),
+                    listView.HighlightItemPageDown(toggleSelection: false),
 
                 After = """
                       ItemA
@@ -385,7 +385,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageDown(),
+                    listView.HighlightItemPageDown(toggleSelection: false),
 
                 After = """
                       ItemA
@@ -415,7 +415,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageUp(),
+                    listView.HighlightItemPageUp(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -437,7 +437,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageUp(),
+                    listView.HighlightItemPageUp(toggleSelection : false),
 
                 After = """
                       ItemA
@@ -461,7 +461,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageUp(),
+                    listView.HighlightItemPageUp(toggleSelection: false),
 
                 After = """
                     > ItemA |
@@ -483,7 +483,7 @@ public partial class ListViewTests
                     """,
 
                 Action = listView =>
-                    listView.HighlightItemPageUp(),
+                    listView.HighlightItemPageUp(toggleSelection : false),
 
                 After = """
                     > ItemA |

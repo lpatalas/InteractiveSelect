@@ -171,23 +171,23 @@ internal class ListView<T>
         }
     }
 
-    public void HighlightPreviousItem()
-        => SetHighlightedIndex(highlightedIndex - 1);
+    public void HighlightPreviousItem(bool toggleSelection)
+        => SetHighlightedIndex(highlightedIndex - 1, toggleSelection);
 
-    public void HighlightNextItem()
-        => SetHighlightedIndex(highlightedIndex + 1);
+    public void HighlightNextItem(bool toggleSelection)
+        => SetHighlightedIndex(highlightedIndex + 1, toggleSelection);
 
-    public void HighlightItemPageUp()
-        => SetHighlightedIndex(highlightedIndex - pageSize + 1);
+    public void HighlightItemPageUp(bool toggleSelection)
+        => SetHighlightedIndex(highlightedIndex - pageSize + 1, toggleSelection);
 
-    public void HighlightItemPageDown()
-        => SetHighlightedIndex(highlightedIndex + pageSize - 1);
+    public void HighlightItemPageDown(bool toggleSelection)
+        => SetHighlightedIndex(highlightedIndex + pageSize - 1, toggleSelection);
 
-    public void HighlightFirstItem()
-        => SetHighlightedIndex(items.Count > 0 ? 0 : null);
+    public void HighlightFirstItem(bool toggleSelection)
+        => SetHighlightedIndex(items.Count > 0 ? 0 : null, toggleSelection);
 
-    public void HighlightLastItem()
-        => SetHighlightedIndex(items.Count > 0 ? items.Count - 1 : null);
+    public void HighlightLastItem(bool toggleSelection)
+        => SetHighlightedIndex(items.Count > 0 ? items.Count - 1 : null, toggleSelection);
 
     public void ToggleSelection()
         => HighlightedItem?.ToggleSelection();
@@ -210,14 +210,29 @@ internal class ListView<T>
             item.ToggleSelection();
     }
 
-    private void SetHighlightedIndex(int? newIndex)
+    private void SetHighlightedIndex(int? newIndex, bool toggleSelection = false)
     {
+        var previousHighlightedIndex = highlightedIndex;
         var previousHighlightedItem = HighlightedItem;
 
         if (items.Count > 0 && newIndex.HasValue)
             highlightedIndex = Math.Clamp(newIndex.Value, 0, items.Count - 1);
         else
             highlightedIndex = null;
+
+        if (toggleSelection && previousHighlightedIndex.HasValue && highlightedIndex.HasValue)
+        {
+            if (previousHighlightedIndex == highlightedIndex)
+            {
+                items[highlightedIndex.Value].ToggleSelection();
+            }
+            else
+            {
+                int step = highlightedIndex.Value < previousHighlightedIndex.Value ? -1 : 1;
+                for (int i = previousHighlightedIndex.Value; i != highlightedIndex.Value; i += step)
+                    items[i].ToggleSelection();
+            }
+        }
 
         MaintainInvariants();
 
@@ -320,7 +335,11 @@ internal class ListView<T>
             };
         }
 
-        var lines = inputText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        var lines = inputText
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .ToArray();
+
         var items = lines.Select(ParseItem).ToList();
         var scrollOffset = Array.FindIndex(lines, line => line.EndsWith("|"));
         var pageSize = lines.Count(line => line.EndsWith("|"));

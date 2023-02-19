@@ -32,7 +32,7 @@ internal class ListPane
 
     public void Initialize()
     {
-        listView.HighlightFirstItem();
+        listView.HighlightFirstItem(toggleSelection: false);
     }
 
     public IEnumerable<PSObject?> GetSelectedObjects()
@@ -42,6 +42,9 @@ internal class ListPane
 
     public bool HandleKey(ConsoleKeyInfo keyInfo)
     {
+        bool ShouldToggleSelection()
+            => keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift);
+
         switch (keyInfo.Key)
         {
             case ConsoleKey.Escape:
@@ -52,22 +55,22 @@ internal class ListPane
                 }
                 break;
             case ConsoleKey.UpArrow:
-                listView.HighlightPreviousItem();
+                listView.HighlightPreviousItem(toggleSelection: ShouldToggleSelection());
                 return true;
             case ConsoleKey.DownArrow:
-                listView.HighlightNextItem();
+                listView.HighlightNextItem(toggleSelection: ShouldToggleSelection());
                 return true;
             case ConsoleKey.Home:
-                listView.HighlightFirstItem();
+                listView.HighlightFirstItem(toggleSelection: ShouldToggleSelection());
                 return true;
             case ConsoleKey.End:
-                listView.HighlightLastItem();
+                listView.HighlightLastItem(toggleSelection: ShouldToggleSelection());
                 return true;
             case ConsoleKey.PageUp:
-                listView.HighlightItemPageUp();
+                listView.HighlightItemPageUp(toggleSelection: ShouldToggleSelection());
                 return true;
             case ConsoleKey.PageDown:
-                listView.HighlightItemPageDown();
+                listView.HighlightItemPageDown(toggleSelection: ShouldToggleSelection());
                 return true;
             case ConsoleKey.Backspace:
                 if (!string.IsNullOrEmpty(listView.Filter))
