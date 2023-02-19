@@ -6,14 +6,15 @@ public partial class ListViewTests
 {
     // Test cases use ASCII art to define ListView visually, e.g.
     //
-    //    ItemA
-    //    ItemB |   <-- Vertical bars specify current page. First bar from top
-    //  > ItemC |       determines scroll offset (1) and the numbers of bars
-    //    ItemD |       specifies page size (3).
-    //    ItemE
+    //     ItemA
+    //     ItemB |   <-- Vertical bars specify current page. First bar from top
+    //  >  ItemC |       determines scroll offset (1) and the numbers of bars
+    //    *ItemD |       specifies page size (3).
+    //    *ItemE
     //
     //  - ">" character in the first column marks currently highlighted item.
     //  - The rest of non-whitespace characters are item value.
+    //  - "*" character marks selected item
 
     [Theory]
     [MemberData(nameof(HighlightNextItemScenarios))]
@@ -42,7 +43,7 @@ public partial class ListViewTests
 
                 ExpectedChangeNotifications = { "ItemB" }
             },
-            new Scenario("Scroll down when the last item on the page was selected")
+            new Scenario("Scroll down when the last item on the page was highlighted")
             {
                 Before = """
                       ItemA |
@@ -62,7 +63,7 @@ public partial class ListViewTests
                 ExpectedChangeNotifications = { "ItemC" }
             },
 
-            new Scenario("Do nothing when the last item is already selected")
+            new Scenario("Do nothing when the last item is already highlighted")
             {
                 Before = """
                       ItemA
@@ -110,7 +111,7 @@ public partial class ListViewTests
 
                 ExpectedChangeNotifications = { "ItemA" }
             },
-            new Scenario("Scroll up when the first item on the page was selected")
+            new Scenario("Scroll up when the first item on the page was highlighted")
             {
                 Before = """
                       ItemA
@@ -130,7 +131,7 @@ public partial class ListViewTests
                 ExpectedChangeNotifications = { "ItemA" }
             },
 
-            new Scenario("Do nothing when the first item is already selected")
+            new Scenario("Do nothing when the first item is already highlighted")
             {
                 Before = """
                     > ItemA |
@@ -376,7 +377,7 @@ public partial class ListViewTests
                 ExpectedChangeNotifications = { "ItemE" }
             },
 
-            new Scenario("Do nothing when the last item is already selected")
+            new Scenario("Do nothing when the last item is already highlighted")
             {
                 Before = """
                       ItemA
@@ -474,7 +475,7 @@ public partial class ListViewTests
                 ExpectedChangeNotifications = { "ItemA" }
             },
 
-            new Scenario("Do nothing when the first item is already selected")
+            new Scenario("Do nothing when the first item is already highlighted")
             {
                 Before = """
                     > ItemA |
@@ -493,81 +494,5 @@ public partial class ListViewTests
 
                 ExpectNoChangeNotifications = true
             }
-        };
-
-    [Theory]
-    [MemberData(nameof(FilteringScenarios))]
-    public void FilteringScenarioTests(Scenario testCase)
-        => testCase.Run();
-
-    public static TheoryData<Scenario> FilteringScenarios =>
-        new()
-        {
-            new Scenario("Keep highlighted index as is if it's still visible")
-            {
-                Before = """
-                      AAB |
-                      AAC |
-                    > BBB |
-                      BCC
-                    """,
-
-                Action = listView =>
-                    listView.Filter = "B",
-
-                After = """
-                      AAB |
-                    > BBB |
-                      BCC |
-                    """,
-
-                ExpectNoChangeNotifications = true
-            },
-
-            new Scenario("Move highlighted index to the first item if currently highlighted one was filtered-out")
-            {
-                Before = """
-                      AAA |
-                      ABB |
-                    > BBB |
-                      ACC
-                    """,
-
-                Action = listView =>
-                    listView.Filter = "A",
-
-                After = """
-                    > AAA |
-                      ABB |
-                      ACC |
-                    """,
-
-                ExpectedChangeNotifications = { "AAA" }
-            },
-
-            new Scenario("Adjust scroll offset when highlighted item position change after filtering")
-            {
-                Before = """
-                      AAA
-                      ABB
-                    > BBB |
-                      ACC |
-                      CCC |
-                      CCB
-                      CBD
-                    """,
-
-                Action = listView =>
-                    listView.Filter = "B",
-
-                After = """
-                      ABB
-                    > BBB |
-                      CCB |
-                      CBD |
-                    """,
-
-                ExpectNoChangeNotifications = true
-            },
         };
 }

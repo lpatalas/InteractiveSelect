@@ -6,7 +6,7 @@ partial class ListViewTests
 {
     [Theory]
     [MemberData(nameof(SelectionScenarios))]
-    public void SelectionScenarioTests(Scenario scenario)
+    public void SelectionTests(Scenario scenario)
         => scenario.Run();
 
     public static TheoryData<Scenario> SelectionScenarios =>
