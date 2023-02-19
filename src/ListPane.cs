@@ -76,6 +76,27 @@ internal class ListPane
             case ConsoleKey.Spacebar:
                 listView.ToggleSelection();
                 return true;
+            case ConsoleKey.A:
+                if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control))
+                {
+                    listView.SelectAll();
+                    return true;
+                }
+                break;
+            case ConsoleKey.D:
+                if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control))
+                {
+                    listView.UnselectAll();
+                    return true;
+                }
+                break;
+            case ConsoleKey.I:
+                if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control))
+                {
+                    listView.InvertSelection();
+                    return true;
+                }
+                break;
             default:
                 if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
                 {

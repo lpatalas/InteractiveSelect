@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -31,6 +33,26 @@ file class ListItem<T>
         => IsSelected = !IsSelected;
 }
 
+file class ListItemStructuralEqualityComparer<T> : IEqualityComparer<ListItem<T>>
+{
+    public static readonly ListItemStructuralEqualityComparer<T> Instance
+        = new ListItemStructuralEqualityComparer<T>();
+
+    public bool Equals(ListItem<T>? first, ListItem<T>? second)
+    {
+        if (first == null && second == null)
+            return true;
+        if (first == null || second == null)
+            return false;
+
+        return first.IsSelected == second.IsSelected
+            && Equals(first!.Item, second!.Item);
+    }
+
+    public int GetHashCode([DisallowNull] ListItem<T> obj)
+        => HashCode.Combine(obj.IsSelected, obj.Item);
+}
+
 internal class ListView<T>
     where T : class
 {
@@ -56,7 +78,7 @@ internal class ListView<T>
         ListFilterPredicate<T> filterPredicate,
         Action<T?>? highlightedItemChangedCallback)
         : this(
-              originalItems,
+              originalItems.Select(x => new ListItem<T>(x)).ToList(),
               scrollOffset: 0,
               pageSize,
               highlightedIndex: null,
@@ -67,7 +89,7 @@ internal class ListView<T>
     }
 
     private ListView(
-        IReadOnlyList<T> originalItems,
+        IReadOnlyList<ListItem<T>> originalItems,
         int scrollOffset,
         int pageSize,
         int? highlightedIndex,
@@ -82,7 +104,7 @@ internal class ListView<T>
         if (highlightedIndex < 0 || highlightedIndex >= originalItems.Count)
             throw new ArgumentOutOfRangeException(nameof(highlightedIndex));
 
-        this.originalItems = originalItems.Select(x => new ListItem<T>(x)).ToList();
+        this.originalItems = originalItems;
         this.items = new List<ListItem<T>>(this.originalItems);
         this.filterPredicate = filterPredicate;
 
@@ -110,7 +132,7 @@ internal class ListView<T>
         return pageSize == other.pageSize
             && scrollOffset == other.scrollOffset
             && highlightedIndex == other.highlightedIndex
-            && items.Select(i => i.Item).SequenceEqual(other.items.Select(i => i.Item));
+            && items.SequenceEqual(other.items, ListItemStructuralEqualityComparer<T>.Instance);
     }
 
     private void SetFilter(string filter)
@@ -126,6 +148,8 @@ internal class ListView<T>
             {
                 if (filterPredicate(item.Item, filter))
                     items.Add(item);
+                else
+                    item.IsSelected = false;
             }
         }
         else
@@ -167,6 +191,24 @@ internal class ListView<T>
 
     public void ToggleSelection()
         => HighlightedItem?.ToggleSelection();
+
+    public void SelectAll()
+    {
+        foreach (var item in items)
+            item.IsSelected = true;
+    }
+
+    public void UnselectAll()
+    {
+        foreach (var item in items)
+            item.IsSelected = false;
+    }
+
+    public void InvertSelection()
+    {
+        foreach (var item in items)
+            item.ToggleSelection();
+    }
 
     private void SetHighlightedIndex(int? newIndex)
     {
@@ -268,8 +310,18 @@ internal class ListView<T>
 
     public static ListView<string> FromAsciiArt(string inputText)
     {
+        ListItem<string> ParseItem(string line)
+        {
+            var trimmedLine = line.Trim(' ', '>', '|');
+            return trimmedLine switch
+            {
+                ['*', .. var rest] => new ListItem<string>(rest) { IsSelected = true },
+                _ => new ListItem<string>(trimmedLine)
+            };
+        }
+
         var lines = inputText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-        var items = lines.Select(line => line.Trim(' ', '>', '|')).ToArray();
+        var items = lines.Select(ParseItem).ToList();
         var scrollOffset = Array.FindIndex(lines, line => line.EndsWith("|"));
         var pageSize = lines.Count(line => line.EndsWith("|"));
         var highlightedIndex = Array.FindIndex(lines, line => line.StartsWith(">")) switch
@@ -289,12 +341,22 @@ internal class ListView<T>
     public string ToAsciiArt()
     {
         var result = new StringBuilder();
+        var isAnyItemSelected = items.Any(item => item.IsSelected);
+
         for (int i = 0; i < originalItems.Count; i++)
         {
             if (i == highlightedIndex)
                 result.Append("> ");
             else
                 result.Append("  ");
+
+            if (isAnyItemSelected)
+            {
+                if (originalItems[i].IsSelected)
+                    result.Append('*');
+                else
+                    result.Append(' ');
+            }
 
             result.Append(originalItems[i].Item);
 
