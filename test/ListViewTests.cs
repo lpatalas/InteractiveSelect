@@ -18,7 +18,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(HighlightNextItemScenarios))]
     public void HighlightNextItemTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> HighlightNextItemScenarios =>
         new()
@@ -86,7 +86,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(HighlightPreviousItemTestCases))]
     public void HighlightPreviousItemTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> HighlightPreviousItemTestCases =>
         new()
@@ -154,7 +154,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(HighlightFirstItemTestCases))]
     public void HighlightFirstItemTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> HighlightFirstItemTestCases =>
         new()
@@ -228,7 +228,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(HighlightLastItemTestCases))]
     public void HighlightLastItemTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> HighlightLastItemTestCases =>
         new()
@@ -302,7 +302,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(HighlightItemPageDownScenarios))]
     public void HighlightItemPageDownTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> HighlightItemPageDownScenarios =>
         new()
@@ -400,7 +400,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(HighlightItemPageUpScenarios))]
     public void HighlightItemPageUpTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> HighlightItemPageUpScenarios =>
         new()
@@ -498,7 +498,7 @@ public partial class ListViewTests
     [Theory]
     [MemberData(nameof(FilteringScenarios))]
     public void FilteringScenarioTests(Scenario testCase)
-        => RunScenario(testCase);
+        => testCase.Run();
 
     public static TheoryData<Scenario> FilteringScenarios =>
         new()
