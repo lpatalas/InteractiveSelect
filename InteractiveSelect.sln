@@ -9,8 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InteractiveSelect.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{90A14ECE-FEA2-417F-9A04-ACE7AB1801CA}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
+		global.json = global.json
 		TODO.md = TODO.md
+		Version.props = Version.props
 	EndProjectSection
 EndProject
 Global
