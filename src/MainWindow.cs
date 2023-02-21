@@ -6,7 +6,7 @@ using System.Management.Automation.Host;
 
 namespace InteractiveSelect;
 
-internal record MainLoopResult(IEnumerable<PSObject?> SelectedItems);
+internal record MainLoopResult(IEnumerable<object?> SelectedItems);
 
 internal class MainWindow
 {
@@ -19,16 +19,19 @@ internal class MainWindow
     private const int separatorWidth = 1;
 
     private ActivePane activePane = ActivePane.List;
+    private readonly KeyBindings keyBindings;
     private readonly int height;
     private readonly ListPane listPane;
     private readonly PreviewPane? previewPane;
 
     public MainWindow(
         PSHostUserInterface hostUI,
+        KeyBindings keyBindings,
         IReadOnlyList<InputObject> inputObjects,
         int height,
         PSPropertyExpression? previewExpression)
     {
+        this.keyBindings = keyBindings;
         this.height = height;
 
         int maxListPaneWidth = previewExpression switch
@@ -56,14 +59,33 @@ internal class MainWindow
 
         listPane.Initialize();
 
-        var selectedObjects = Enumerable.Empty<PSObject?>();
+        var selectedObjects = Enumerable.Empty<object?>();
         var isExiting = false;
         while (!isExiting)
         {
             Draw(hostUI, initialCursorPosition);
 
             var pressedKey = Console.ReadKey(intercept: true);
-            var keyHandled = HandleKey(pressedKey);
+
+            bool keyHandled = false;
+
+            var scriptApi = new ExternalScriptApi(listPane.HighlightedValue);
+            if (keyBindings.HandleKey(pressedKey, scriptApi))
+            {
+                keyHandled = true;
+                if (scriptApi.WasExitRequested)
+                {
+                    if (scriptApi.Result is IEnumerable<object?> collection)
+                        selectedObjects = collection;
+                    else if (scriptApi.Result is { } value)
+                        selectedObjects = new[] { value };
+
+                    isExiting = true;
+                }
+            }
+
+            if (!keyHandled)
+                keyHandled = HandleKey(pressedKey);
 
             if (!keyHandled)
             {

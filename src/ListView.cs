@@ -67,6 +67,7 @@ internal class ListView<T>
     private ListItem<T>? HighlightedItem => highlightedIndex.HasValue ? items[highlightedIndex.Value] : default;
 
     public event EventHandler<HighlightedItemChangedEventArgs<T?>>? HighlightedItemChanged;
+    public T? HighlightedValue => HighlightedItem?.Item;
 
     public int VisibleItemCount => items.Count;
     public int TotalItemCount => originalItems.Count;

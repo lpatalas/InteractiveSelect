@@ -1,4 +1,4 @@
-﻿$DebugPreference = 'Continue'
+﻿$DebugPreference = 'SilentlyContinue'
 Import-Module "$PSScriptRoot\InteractiveSelect.psd1"
 
 $dir = Get-Item $pwd

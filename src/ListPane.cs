@@ -11,6 +11,7 @@ internal class ListPane
     private readonly ListView<InputObject> listView;
     private const int scrollBarWidth = 1;
 
+    public object? HighlightedValue => listView.HighlightedValue?.Value;
     public int Width { get; }
 
     public ListPane(

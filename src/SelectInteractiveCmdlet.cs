@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
 
@@ -35,6 +36,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
     [Parameter]
     public DimensionParameter? Height { get; set; }
+
+    [Parameter]
+    public KeyBindings? KeyBindings { get; set; }
 
     private bool HasPipelineInput
         => string.Equals(ParameterSetName, ParameterSets.InputFromPipeline, StringComparison.Ordinal);
@@ -84,6 +88,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
                 var mainWindow = new MainWindow(
                     Host.UI,
+                    KeyBindings ?? KeyBindings.Empty,
                     inputObjects,
                     calculatedHeight.GetValueOrDefault(20),
                     Preview);
