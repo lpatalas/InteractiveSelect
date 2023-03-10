@@ -57,6 +57,7 @@ internal class SinglePaneLayout : IPaneLayout
 
 internal class SplitPaneLayout : IPaneLayout
 {
+    private const int minimumPaneSize = 2;
     private const int separatorSize = 1;
 
     private enum ActivePane
@@ -69,6 +70,7 @@ internal class SplitPaneLayout : IPaneLayout
     private Size currentSize;
     private readonly ListPane listPane;
     private readonly PreviewPane previewPane;
+    private readonly IDimensionValue? splitOffset;
     private readonly SplitDirection splitDirection;
 
     public ListPane ListPane => listPane;
@@ -77,10 +79,12 @@ internal class SplitPaneLayout : IPaneLayout
     public SplitPaneLayout(
         ListPane listPane,
         PreviewPane previewPane,
+        IDimensionValue? splitOffset,
         SplitDirection splitDirection)
     {
         this.listPane = listPane;
         this.previewPane = previewPane;
+        this.splitOffset = splitOffset;
         this.splitDirection = splitDirection;
     }
 
@@ -119,15 +123,41 @@ internal class SplitPaneLayout : IPaneLayout
 
         if (splitDirection == SplitDirection.Horizontal)
         {
-            return new Size(
-                Math.Min(maxListSize.Width, totalWidth / 2),
-                totalHeight);
+            if (splitOffset is IDimensionValue offset)
+            {
+                var paneWidth = offset.CalculateAbsoluteValue(totalWidth);
+                if (paneWidth < minimumPaneSize)
+                    paneWidth = minimumPaneSize;
+                else if (paneWidth + separatorSize + minimumPaneSize > totalWidth)
+                    paneWidth = totalWidth - separatorSize - minimumPaneSize;
+
+                return new Size(paneWidth, totalHeight);
+            }
+            else
+            {
+                return new Size(
+                    Math.Min(maxListSize.Width, totalWidth / 2),
+                    totalHeight);
+            }
         }
         else if (splitDirection == SplitDirection.Vertical)
         {
-            return new Size(
-                totalWidth,
-                Math.Min(maxListSize.Height, totalHeight / 2));
+            if (splitOffset is IDimensionValue offset)
+            {
+                var paneHeight = offset.CalculateAbsoluteValue(totalHeight);
+                if (paneHeight < minimumPaneSize)
+                    paneHeight = minimumPaneSize;
+                else if (paneHeight + minimumPaneSize > totalHeight)
+                    paneHeight = totalHeight - minimumPaneSize;
+
+                return new Size(totalWidth, paneHeight);
+            }
+            else
+            {
+                return new Size(
+                    totalWidth,
+                    Math.Min(maxListSize.Height, totalHeight / 2));
+            }
         }
         else
         {

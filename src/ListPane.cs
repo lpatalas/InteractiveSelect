@@ -38,7 +38,7 @@ internal class ListPane
     }
 
     public Size GetMaximumSize()
-        => new Size(maxItemWidth, listView.TotalItemCount);
+        => new Size(maxItemWidth + scrollBarWidth, listView.TotalItemCount + headerHeight);
 
     public void Resize(int newWidth, int newHeight)
     {

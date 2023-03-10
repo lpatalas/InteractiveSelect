@@ -22,6 +22,7 @@ internal class MainWindow
         IReadOnlyList<InputObject> inputObjects,
         int initialWidth,
         int initialHeight,
+        IDimensionValue? splitOffset,
         SplitDirection splitDirection,
         PSPropertyExpression? previewExpression)
     {
@@ -44,7 +45,11 @@ internal class MainWindow
         {
             int previewWidth = hostUI.RawUI.WindowSize.Width - listPane.Width - separatorWidth;
             var previewPane = new PreviewPane(previewExpression, previewWidth, height);
-            paneLayout = new SplitPaneLayout(listPane, previewPane, splitDirection);
+            paneLayout = new SplitPaneLayout(
+                listPane,
+                previewPane,
+                splitOffset,
+                splitDirection);
         }
         else
         {

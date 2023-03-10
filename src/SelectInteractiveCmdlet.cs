@@ -38,6 +38,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
     public DimensionParameter? Height { get; set; }
 
     [Parameter]
+    public DimensionParameter? SplitOffset { get; set; }
+
+    [Parameter]
     public SwitchParameter Vertical { get; set; }
 
     [Parameter]
@@ -95,6 +98,7 @@ public class SelectInteractiveCmdlet : PSCmdlet
                     inputObjects,
                     Host.UI.RawUI.WindowSize.Width,
                     calculatedHeight.GetValueOrDefault(20),
+                    SplitOffset?.Value,
                     Vertical.IsPresent ? SplitDirection.Vertical : SplitDirection.Horizontal,
                     Preview);
 
