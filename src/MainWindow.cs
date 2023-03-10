@@ -10,29 +10,23 @@ internal record MainLoopResult(IEnumerable<object?> SelectedItems);
 
 internal class MainWindow
 {
-    private enum ActivePane
-    {
-        List,
-        Preview
-    }
-
     private const int separatorWidth = 1;
 
-    private ActivePane activePane = ActivePane.List;
     private readonly KeyBindings keyBindings;
     private readonly int height;
-    private readonly ListPane listPane;
-    private readonly PreviewPane? previewPane;
+    private readonly IPaneLayout paneLayout;
 
     public MainWindow(
         PSHostUserInterface hostUI,
         KeyBindings keyBindings,
         IReadOnlyList<InputObject> inputObjects,
-        int height,
+        int initialWidth,
+        int initialHeight,
+        SplitDirection splitDirection,
         PSPropertyExpression? previewExpression)
     {
         this.keyBindings = keyBindings;
-        this.height = height;
+        this.height = initialHeight;
 
         int maxListPaneWidth = previewExpression switch
         {
@@ -40,7 +34,7 @@ internal class MainWindow
             _ => hostUI.RawUI.WindowSize.Width / 2
         };
 
-        listPane = new ListPane(
+        var listPane = new ListPane(
             inputObjects,
             maxListPaneWidth,
             height,
@@ -49,27 +43,34 @@ internal class MainWindow
         if (previewExpression != null)
         {
             int previewWidth = hostUI.RawUI.WindowSize.Width - listPane.Width - separatorWidth;
-            previewPane = new PreviewPane(previewExpression, previewWidth, height);
+            var previewPane = new PreviewPane(previewExpression, previewWidth, height);
+            paneLayout = new SplitPaneLayout(listPane, previewPane, splitDirection);
         }
+        else
+        {
+            paneLayout = new SinglePaneLayout(listPane);
+        }
+
+        paneLayout.Resize(initialWidth, initialHeight);
     }
 
     public MainLoopResult RunMainLoop(PSHostUserInterface hostUI)
     {
         var initialCursorPosition = ReserveBufferSpace(hostUI);
 
-        listPane.Initialize();
+        paneLayout.PreviewPane?.SetPreviewedObject(paneLayout.ListPane.HighlightedValue);
 
         var selectedObjects = Enumerable.Empty<object?>();
         var isExiting = false;
         while (!isExiting)
         {
-            Draw(hostUI, initialCursorPosition);
+            paneLayout.Draw(hostUI, initialCursorPosition);
 
             var pressedKey = Console.ReadKey(intercept: true);
 
             bool keyHandled = false;
 
-            var scriptApi = new ExternalScriptApi(listPane.HighlightedValue);
+            var scriptApi = new ExternalScriptApi(paneLayout.ListPane.HighlightedValue);
             if (keyBindings.HandleKey(pressedKey, scriptApi))
             {
                 keyHandled = true;
@@ -92,7 +93,7 @@ internal class MainWindow
                 switch (pressedKey.Key)
                 {
                     case ConsoleKey.Enter:
-                        selectedObjects = listPane.GetSelectedObjects();
+                        selectedObjects = paneLayout.ListPane.GetSelectedObjects();
                         isExiting = true;
                         break;
                     case ConsoleKey.Escape:
@@ -109,25 +110,17 @@ internal class MainWindow
 
     private bool HandleKey(ConsoleKeyInfo keyInfo)
     {
-        if (keyInfo.Key == ConsoleKey.Tab && previewPane != null)
+        if (keyInfo.Key == ConsoleKey.Tab)
         {
-            if (activePane == ActivePane.List)
-                activePane = ActivePane.Preview;
-            else
-                activePane = ActivePane.List;
-
-            return true;
+            return paneLayout.ToggleActivePane();
         }
 
-        if (activePane == ActivePane.List)
-            return listPane.HandleKey(keyInfo);
-        else
-            return previewPane?.HandleKey(keyInfo) ?? false;
+        return paneLayout.HandleKey(keyInfo);
     }
 
     private void OnHighlightedListItemChanged(PSObject? selectedItem)
     {
-        previewPane?.SetPreviewedObject(selectedItem);
+        paneLayout.PreviewPane?.SetPreviewedObject(selectedItem);
     }
 
     private Coordinates ReserveBufferSpace(PSHostUserInterface hostUI)
@@ -137,55 +130,13 @@ internal class MainWindow
         return hostUI.RawUI.CursorPosition;
     }
 
-    private void Draw(PSHostUserInterface hostUI, Coordinates topLeft)
-    {
-        var mainArea = new Rectangle(
-            topLeft.X,
-            topLeft.Y,
-            hostUI.RawUI.BufferSize.Width,
-            topLeft.Y + height);
-
-        var listPaneArea = new Rectangle(
-            mainArea.Left,
-            mainArea.Top,
-            mainArea.Left + listPane.Width,
-            mainArea.Bottom);
-
-        var listPaneCanvas = new Canvas(hostUI, listPaneArea);
-        listPane.Draw(listPaneCanvas, activePane == ActivePane.List);
-
-        if (previewPane != null)
-        {
-            var previewPaneArea = new Rectangle(
-                listPaneArea.Right + 1,
-                mainArea.Top,
-                mainArea.Right,
-                mainArea.Bottom);
-
-            var previewPaneCanvas = new Canvas(hostUI, previewPaneArea);
-            previewPane?.Draw(previewPaneCanvas, activePane == ActivePane.Preview);
-
-            var separatorArea = new Rectangle(
-                listPaneArea.Right,
-                mainArea.Top,
-                previewPaneArea.Left,
-                mainArea.Bottom);
-
-            var separatorText = ConsoleString.CreateStyled(Theme.Instance.Border + "\u2502");
-            var separatorCanvas = new Canvas(hostUI, separatorArea);
-            separatorCanvas.FillLine(0, ConsoleString.CreateStyled(Theme.Instance.Border + "\u252c"));
-            for (int i = 1; i < separatorArea.GetHeight(); i++)
-                separatorCanvas.FillLine(i, separatorText);
-        }
-    }
-
     private void ClearConsole(PSHostUserInterface hostUI, Coordinates topLeft)
     {
-        var area = new Rectangle(
+        var area = new Rect(
             0,
             topLeft.Y,
             hostUI.RawUI.BufferSize.Width,
-            topLeft.Y + height);
+            height);
 
         var canvas = new Canvas(hostUI, area);
         canvas.Clear();

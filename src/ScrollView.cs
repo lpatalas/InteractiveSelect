@@ -6,7 +6,7 @@ namespace InteractiveSelect;
 internal class ScrollView<T>
 {
     private IReadOnlyList<T> items;
-    private readonly int pageSize;
+    private int pageSize;
     private int scrollOffset;
 
     public int TotalCount => items.Count;
@@ -25,6 +25,15 @@ internal class ScrollView<T>
 
     public Page<T> GetCurrentPage()
         => new Page<T>(items, scrollOffset, Math.Min(items.Count, pageSize));
+
+    public void SetPageSize(int newPageSize)
+    {
+        pageSize = newPageSize;
+        if (scrollOffset + pageSize >= items.Count)
+        {
+            scrollOffset = Math.Max(0, items.Count - pageSize);
+        }
+    }
 
     public void SetItems(IReadOnlyList<T> items)
     {

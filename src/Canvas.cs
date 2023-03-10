@@ -6,30 +6,25 @@ namespace InteractiveSelect;
 
 internal class Canvas
 {
-    private readonly Rectangle area;
+    private readonly Rect area;
     private readonly StringBuilder buffer;
     private readonly PSHostUserInterface hostUI;
 
-    public int Width => area.GetWidth();
-    public int Height => area.GetHeight();
+    public int Width => area.Width;
+    public int Height => area.Height;
 
-    public Canvas(PSHostUserInterface hostUI, Rectangle area)
+    public Canvas(PSHostUserInterface hostUI, Rect area)
     {
         this.area = area;
         this.hostUI = hostUI;
 
         // capacity is line width plus extra space for ANSI control sequences
-        buffer = new StringBuilder(capacity: area.GetWidth() * 2);
+        buffer = new StringBuilder(capacity: area.Width * 2);
     }
 
     public Canvas GetSubArea(int x, int y, int width, int height)
     {
-        var subArea = new Rectangle(
-            left: area.Left + x,
-            top: area.Top + y,
-            right: area.Left + x + width,
-            bottom: area.Top + y + height);
-
+        var subArea = new Rect(area.X + x, area.Y + y, width, height);
         return new Canvas(hostUI, subArea);
     }
 
@@ -62,10 +57,10 @@ internal class Canvas
 
     public void FillLine(int lineIndex, ConsoleString text)
     {
-        if (lineIndex >= area.GetHeight())
+        if (lineIndex >= area.Height)
             throw new PSArgumentOutOfRangeException(nameof(lineIndex));
 
-        var lineWidth = area.GetWidth();
+        var lineWidth = area.Width;
         if (text.ContentLength > lineWidth)
             text = text.AddEllipsis(lineWidth);
 
@@ -75,15 +70,15 @@ internal class Canvas
             buffer.Append(' ', lineWidth - text.ContentLength);
         buffer.Append(EscapeSequence.Reset.ToString());
 
-        hostUI.RawUI.CursorPosition = new Coordinates(area.Left, area.Top + lineIndex);
+        hostUI.RawUI.CursorPosition = new Coordinates(area.X, area.Y + lineIndex);
         hostUI.Write(buffer.ToString());
     }
 
     public void Clear()
     {
-        for (var y = 0; y < area.GetHeight(); y++)
+        for (var y = 0; y < area.Height; y++)
             FillLine(y, ConsoleString.Empty);
 
-        hostUI.RawUI.CursorPosition = area.GetTopLeft();
+        hostUI.RawUI.CursorPosition = area.TopLeft;
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Host;
 
 namespace InteractiveSelect;
 
@@ -9,10 +10,13 @@ internal class ListPane
 {
     private const int headerHeight = 1;
     private readonly ListView<InputObject> listView;
+    private readonly int maxItemWidth;
     private const int scrollBarWidth = 1;
 
-    public object? HighlightedValue => listView.HighlightedValue?.Value;
-    public int Width { get; }
+    public PSObject? HighlightedValue => listView.HighlightedValue?.Value;
+
+    public int Width { get; private set; }
+    public int Height { get; private set; }
 
     public ListPane(
         IReadOnlyList<InputObject> inputObjects,
@@ -27,13 +31,20 @@ internal class ListPane
             (item, filter) => item.Label.Contains(filter, StringComparison.OrdinalIgnoreCase),
             listItem => highlightedItemChangedCallback(listItem?.Value));
 
-        int maxItemWidth = inputObjects.Max(x => x.Label.ContentLength);
+        maxItemWidth = inputObjects.Max(x => x.Label.ContentLength);
+
         Width = Math.Min(maxItemWidth + scrollBarWidth, maximumWidth);
+        Height = height;
     }
 
-    public void Initialize()
+    public Size GetMaximumSize()
+        => new Size(maxItemWidth, listView.TotalItemCount);
+
+    public void Resize(int newWidth, int newHeight)
     {
-        listView.HighlightFirstItem(toggleSelection: false);
+        Width = newWidth;
+        Height = newHeight;
+        listView.SetPageSize(Height - headerHeight);
     }
 
     public IEnumerable<PSObject?> GetSelectedObjects()

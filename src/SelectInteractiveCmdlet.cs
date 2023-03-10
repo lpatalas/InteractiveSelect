@@ -38,6 +38,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
     public DimensionParameter? Height { get; set; }
 
     [Parameter]
+    public SwitchParameter Vertical { get; set; }
+
+    [Parameter]
     public KeyBindings? KeyBindings { get; set; }
 
     private bool HasPipelineInput
@@ -90,7 +93,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
                     Host.UI,
                     KeyBindings ?? KeyBindings.Empty,
                     inputObjects,
+                    Host.UI.RawUI.WindowSize.Width,
                     calculatedHeight.GetValueOrDefault(20),
+                    Vertical.IsPresent ? SplitDirection.Vertical : SplitDirection.Horizontal,
                     Preview);
 
                 var result = mainWindow.RunMainLoop(Host.UI);
