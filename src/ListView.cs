@@ -61,7 +61,7 @@ internal class ListView<T>
     private int? highlightedIndex;
     private readonly List<ListItem<T>> items;
     private readonly IReadOnlyList<ListItem<T>> originalItems;
-    private readonly int pageSize;
+    private int pageSize;
     private int scrollOffset;
 
     private ListItem<T>? HighlightedItem => highlightedIndex.HasValue ? items[highlightedIndex.Value] : default;
@@ -134,6 +134,12 @@ internal class ListView<T>
             && scrollOffset == other.scrollOffset
             && highlightedIndex == other.highlightedIndex
             && items.SequenceEqual(other.items, ListItemStructuralEqualityComparer<T>.Instance);
+    }
+
+    public void SetPageSize(int newPageSize)
+    {
+        this.pageSize = newPageSize;
+        MaintainInvariants();
     }
 
     private void SetFilter(string filter)
