@@ -42,5 +42,9 @@ if ($manifestInfo.LicenseUri -ne $expectedLicenseUrl) {
     throw "License URI '$($manifestInfo.LicenseUri)' does not match expected value '$expectedLicenseUrl'"
 }
 
+if ($manifestInfo.ReleaseNotes -notlike "v$expectedVersion*") {
+    throw "Release notes should be updated in psd1 file"
+}
+
 Write-Host
 Write-Host "Module published to: $modulePath" -ForegroundColor Green

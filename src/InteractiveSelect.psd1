@@ -99,7 +99,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = @"
+v0.9.0
+
+- Initial release
+"@
 
         # Prerelease string of this module
         # Prerelease = ''
