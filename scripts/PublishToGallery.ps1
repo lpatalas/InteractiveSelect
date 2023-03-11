@@ -1,10 +1,6 @@
 #Requires -PSEdition Core -Module PowerShellGet
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)]
-    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Container }, ErrorMessage = 'Directory "{0}" does not exist')]
-    [String] $ModulePath,
-
     [Parameter(Mandatory, ParameterSetName = "LocalPublish")]
     [String] $LocalRepositoryName,
 
@@ -18,17 +14,21 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-if (-not (Test-Path $ModulePath)) {
-    throw "ModulePath '$ModulePath' does not exist"
+$solutionPath = Split-Path $PSScriptRoot
+$publishPath = Join-Path $solutionPath 'artifacts' 'publish'
+$modulePath = Join-Path $publishPath 'InteractiveSelect'
+$manifestPath = Join-Path $modulePath 'InteractiveSelect.psd1'
+
+if (-not (Test-Path $manifestPath)) {
+    throw "Can't find '$manifestPath'. Run 'BuildRelease.ps1' first"
 }
 
 $originalModulePath = $env:PSModulePath
 try {
-    $tempModulesPath = Split-Path $ModulePath
-    $env:PSModulePath += ";$tempModulesPath"
+    $env:PSModulePath = "$publishPath;$env:PSModulePath"
 
     if ($Online) {
-        Write-Host "Running 'Publish-Module -WhatIf ...' for '$ModulePath'" -ForegroundColor Cyan
+        Write-Host "Running 'Publish-Module -WhatIf ...' for '$modulePath'" -ForegroundColor Cyan
         Publish-Module `
             -Path $ModulePath `
             -Repository PSGallery `
@@ -37,9 +37,9 @@ try {
             -WhatIf `
             -ErrorAction Stop
 
-        if ($PSCmdlet.ShouldContinue("Publish module '$ModulePath' to PSGallery?", "Confirm Publish")) {
+        if ($PSCmdlet.ShouldContinue("Publish module '$modulePath' to PSGallery?", "Confirm Publish")) {
             Publish-Module `
-                -Path $ModulePath `
+                -Path $modulePath `
                 -Repository PSGallery `
                 -NuGetApiKey $ApiKey `
                 -ErrorAction Stop
@@ -54,7 +54,7 @@ try {
         Write-Host "Running local publish to repository '$LocalRepositoryName'"
 
         Publish-Module `
-            -Path $ModulePath `
+            -Path $modulePath `
             -Repository $LocalRepositoryName `
             -ErrorAction Stop
 

@@ -16,6 +16,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		Version.props = Version.props
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{78186391-B85B-46D8-91B4-DAE9EA36ED3E}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\PrepareRelease.ps1 = scripts\PrepareRelease.ps1
+		scripts\PublishModule.ps1 = scripts\PublishModule.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{2B3784EF-AD38-4158-89B2-60FC92A7BA30}"
+	ProjectSection(SolutionItems) = preProject
+		examples\git-add.ps1 = examples\git-add.ps1
+		examples\navigate.ps1 = examples\navigate.ps1
+		examples\ripgrep.ps1 = examples\ripgrep.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

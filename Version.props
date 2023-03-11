@@ -1,5 +1,5 @@
 <Project>
   <PropertyGroup>
-    <PSModuleVersion>1.0.0</PSModuleVersion>
+    <PSModuleVersion>0.9.0</PSModuleVersion>
   </PropertyGroup>
 </Project>

@@ -4,7 +4,7 @@
 RootModule = 'InteractiveSelect.dll'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '0.9.0'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -22,7 +22,7 @@ CompanyName = 'Łukasz Patalas'
 Copyright = '(c) Łukasz Patalas. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'Interactive Select'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '7.0'

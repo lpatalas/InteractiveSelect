@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 
 $rootPath = Split-Path $PSScriptRoot
 $artifactsPath = Join-Path $rootPath artifacts
-$publishPath = Join-Path $artifactsPath prepared-release
+$publishPath = Join-Path $artifactsPath publish
 $projectPath = Join-Path $rootPath src InteractiveSelect.csproj
 
 if (Test-Path $publishPath) {
@@ -14,23 +14,15 @@ if (Test-Path $publishPath) {
     Remove-Item -LiteralPath $publishPath -Force -Recurse
 }
 
-$dotnetPublishPath = Join-Path $publishPath temp
+$modulePath = Join-Path $publishPath InteractiveSelect
 dotnet publish $projectPath `
     --configuration Release `
-    --output $dotnetPublishPath `
+    --output $modulePath `
     --verbosity minimal
 
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet build exited with error code $LASTEXITCODE"
 }
-
-$modulePath = Join-Path $publishPath InteractiveSelect
-New-Item -Path $modulePath -ItemType Directory | Out-Null
-
-Copy-Item `
-    -Path (Join-Path $dotnetPublishPath '*') `
-    -Destination $modulePath `
-    -Include InteractiveSelect.dll, InteractiveSelect.psd1
 
 $manifestInfo = Test-ModuleManifest -Path (Join-Path $modulePath InteractiveSelect.psd1)
 $manifestInfo | Format-List
@@ -46,4 +38,4 @@ if ($expectedVersion -ne $manifestInfo.Version) {
 }
 
 Write-Host
-Write-Host "Module is ready in $modulePath" -ForegroundColor Green
+Write-Host "Module published to: $modulePath" -ForegroundColor Green
