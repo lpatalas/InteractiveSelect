@@ -7,10 +7,10 @@ RootModule = 'InteractiveSelect.dll'
 ModuleVersion = '0.9.0'
 
 # Supported PSEditions
-CompatiblePSEditions = @('Core', 'Desktop')
+CompatiblePSEditions = 'Core'
 
 # ID used to uniquely identify this module
-GUID = 'e03ce36d-617b-48db-a34e-548ceabb96fc'
+GUID = '7158c22a-7d0a-4e8d-88fa-970970ffa258'
 
 # Author of this module
 Author = 'Łukasz Patalas'
@@ -25,7 +25,7 @@ Copyright = '(c) Łukasz Patalas. All rights reserved.'
 Description = 'Interactive Select'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '7.0'
+PowerShellVersion = '7.3'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
