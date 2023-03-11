@@ -90,10 +90,10 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        LicenseUri = 'http://github.com/lpatalas/InteractiveSelect/blob/v0.9.0/LICENSE.txt'
+        LicenseUri = 'https://github.com/lpatalas/InteractiveSelect/blob/v0.9.0/LICENSE.txt'
 
         # A URL to the main website for this project.
-        ProjectUri = 'http://github.com/lpatalas/InteractiveSelect'
+        ProjectUri = 'https://github.com/lpatalas/InteractiveSelect'
 
         # A URL to an icon representing this module.
         # IconUri = ''

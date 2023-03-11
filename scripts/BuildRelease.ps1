@@ -1,3 +1,4 @@
+#Requires -Module platyPS
 [CmdletBinding()]
 param()
 
@@ -46,5 +47,16 @@ if ($manifestInfo.ReleaseNotes -notlike "v$expectedVersion*") {
     throw "Release notes should be updated in psd1 file"
 }
 
-Write-Host
+$helpSourcePath = Join-Path $rootPath 'help'
+Get-ChildItem $helpSourcePath `
+| Foreach-Object {
+    $onlineVersion = (Select-String -Path $_ -Pattern '^online version:').Line
+    $expectedHelpUri = "$($manifestInfo.ProjectUri)/blob/v$expectedVersion/help/$($_.Name)"
+    if ($onlineVersion -ne "online version: $expectedHelpUri") {
+        throw "Online URL in '$_' does not match the current version and/or file name '$onlineVersion'. Expected: '$expectedHelpUri'"
+    }
+}
+
+New-ExternalHelp -Path $helpSourcePath -OutputPath $modulePath | Out-Null
+
 Write-Host "Module published to: $modulePath" -ForegroundColor Green
