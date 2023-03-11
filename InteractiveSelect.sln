@@ -13,13 +13,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
+		LICENSE.txt = LICENSE.txt
 		Version.props = Version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{78186391-B85B-46D8-91B4-DAE9EA36ED3E}"
 	ProjectSection(SolutionItems) = preProject
-		scripts\PrepareRelease.ps1 = scripts\PrepareRelease.ps1
-		scripts\PublishModule.ps1 = scripts\PublishModule.ps1
+		scripts\BuildRelease.ps1 = scripts\BuildRelease.ps1
+		scripts\PublishToGallery.ps1 = scripts\PublishToGallery.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{2B3784EF-AD38-4158-89B2-60FC92A7BA30}"

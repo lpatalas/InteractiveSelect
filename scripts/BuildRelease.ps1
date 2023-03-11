@@ -37,5 +37,10 @@ if ($expectedVersion -ne $manifestInfo.Version) {
     throw "Module version in psd1 ($($manifestInfo.Version)) does not match Version.props ($expectedVersion)"
 }
 
+$expectedLicenseUrl = "$($manifestInfo.ProjectUri)/blob/v$expectedVersion/LICENSE.txt"
+if ($manifestInfo.LicenseUri -ne $expectedLicenseUrl) {
+    throw "License URI '$($manifestInfo.LicenseUri)' does not match expected value '$expectedLicenseUrl'"
+}
+
 Write-Host
 Write-Host "Module published to: $modulePath" -ForegroundColor Green
