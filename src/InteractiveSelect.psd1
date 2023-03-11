@@ -7,7 +7,7 @@ RootModule = 'InteractiveSelect.dll'
 ModuleVersion = '0.9.0'
 
 # Supported PSEditions
-CompatiblePSEditions = 'Core'
+CompatiblePSEditions = @('Core', 'Desktop')
 
 # ID used to uniquely identify this module
 GUID = 'e03ce36d-617b-48db-a34e-548ceabb96fc'
@@ -70,7 +70,7 @@ CmdletsToExport = 'Select-Interactive'
 # VariablesToExport = @()
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-AliasesToExport = @()
+# AliasesToExport = @()
 
 # DSC resources to export from this module
 # DscResourcesToExport = @()
@@ -90,7 +90,7 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        LicenseUri = 'https://opensource.org/licenses/MIT'
+        LicenseUri = 'http://github.com/lpatalas/InteractiveSelect/blob/603a0d196d182ecf1ba5d6acc190ed9015965a2a/LICENSE.txt'
 
         # A URL to the main website for this project.
         ProjectUri = 'http://github.com/lpatalas/InteractiveSelect'
