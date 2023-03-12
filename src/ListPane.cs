@@ -112,13 +112,12 @@ internal class ListPane
                     return true;
                 }
                 break;
-            default:
-                if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
-                {
-                    listView.Filter = (listView.Filter ?? "") + keyInfo.KeyChar;
-                    return true;
-                }
-                break;
+        }
+
+        if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar))
+        {
+            listView.Filter = (listView.Filter ?? "") + keyInfo.KeyChar;
+            return true;
         }
 
         return false;
