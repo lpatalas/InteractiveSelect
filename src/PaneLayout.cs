@@ -145,6 +145,9 @@ internal class SplitPaneLayout : IPaneLayout
             if (splitOffset is IDimensionValue offset)
             {
                 var paneHeight = offset.CalculateAbsoluteValue(totalHeight);
+                if (maxListSize.Height < paneHeight)
+                    paneHeight = maxListSize.Height;
+
                 if (paneHeight < minimumPaneSize)
                     paneHeight = minimumPaneSize;
                 else if (paneHeight + minimumPaneSize > totalHeight)
