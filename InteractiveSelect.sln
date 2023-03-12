@@ -27,9 +27,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{7818
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{2B3784EF-AD38-4158-89B2-60FC92A7BA30}"
 	ProjectSection(SolutionItems) = preProject
-		examples\git-add.ps1 = examples\git-add.ps1
-		examples\navigate.ps1 = examples\navigate.ps1
-		examples\ripgrep.ps1 = examples\ripgrep.ps1
+		examples\GitAdd.ps1 = examples\GitAdd.ps1
+		examples\Navigate.ps1 = examples\Navigate.ps1
+		examples\RipGrep.ps1 = examples\RipGrep.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Help", "Help", "{8E335713-74CD-4658-B1DB-6FA694B24D30}"
