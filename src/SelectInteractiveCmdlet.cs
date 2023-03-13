@@ -35,6 +35,9 @@ public class SelectInteractiveCmdlet : PSCmdlet
     public PSObject?[]? Items { get; set; }
 
     [Parameter]
+    public DimensionParameter? Width { get; set; }
+
+    [Parameter]
     public DimensionParameter? Height { get; set; }
 
     [Parameter]
@@ -89,15 +92,16 @@ public class SelectInteractiveCmdlet : PSCmdlet
 
             try
             {
-                var windowHeight = Host.UI.RawUI.WindowSize.Height;
-                var calculatedHeight = Height?.Value?.CalculateAbsoluteValue(windowHeight);
+                var windowSize = Host.UI.RawUI.WindowSize;
+                var calculatedWidth = Width?.Value?.CalculateAbsoluteValue(windowSize.Width);
+                var calculatedHeight = Height?.Value?.CalculateAbsoluteValue(windowSize.Height);
 
                 var mainWindow = new MainWindow(
                     Host.UI,
                     KeyBindings ?? KeyBindings.Empty,
                     inputObjects,
-                    Host.UI.RawUI.WindowSize.Width,
-                    calculatedHeight.GetValueOrDefault(20),
+                    calculatedWidth.GetValueOrDefault(windowSize.Width),
+                    calculatedHeight.GetValueOrDefault(windowSize.Height),
                     SplitOffset?.Value,
                     Vertical.IsPresent ? SplitDirection.Vertical : SplitDirection.Horizontal,
                     Preview);

@@ -29,7 +29,7 @@ internal class MainWindow
         this.keyBindings = keyBindings;
         this.height = initialHeight;
 
-        int maxListPaneWidth = previewExpression switch
+        int defaultListPaneWidth = previewExpression switch
         {
             null => hostUI.RawUI.WindowSize.Width,
             _ => hostUI.RawUI.WindowSize.Width / 2
@@ -37,7 +37,7 @@ internal class MainWindow
 
         var listPane = new ListPane(
             inputObjects,
-            maxListPaneWidth,
+            defaultListPaneWidth,
             height,
             OnHighlightedListItemChanged);
 

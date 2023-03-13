@@ -16,15 +16,15 @@ Filter and select items interactively.
 ### InputFromItems (Default)
 ```
 Select-Interactive [-Property <PSPropertyExpression>] [-Preview <PSPropertyExpression>] [-Items] <PSObject[]>
- [-Height <DimensionParameter>] [-SplitOffset <DimensionParameter>] [-Vertical] [-KeyBindings <KeyBindings>]
- [<CommonParameters>]
+ [-Width <DimensionParameter>] [-Height <DimensionParameter>] [-SplitOffset <DimensionParameter>] [-Vertical]
+ [-KeyBindings <KeyBindings>] [<CommonParameters>]
 ```
 
 ### InputFromPipeline
 ```
 Select-Interactive [-Property <PSPropertyExpression>] [-Preview <PSPropertyExpression>] -InputObject <PSObject>
- [-Height <DimensionParameter>] [-SplitOffset <DimensionParameter>] [-Vertical] [-KeyBindings <KeyBindings>]
- [<CommonParameters>]
+ [-Width <DimensionParameter>] [-Height <DimensionParameter>] [-SplitOffset <DimensionParameter>] [-Vertical]
+ [-KeyBindings <KeyBindings>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -187,8 +187,25 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### CommonParameters
+### -Width
 
+Width of the displayed UI. If it is an absolute number (e.g. `50`) then the UI will
+take the exact number of columns. If it's a percentage (e.g. `25%`) then the width will
+be calculated based on total window width.
+
+```yaml
+Type: DimensionParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
