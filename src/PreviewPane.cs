@@ -8,7 +8,8 @@ namespace InteractiveSelect;
 internal class PreviewPane
 {
     private const int headerSize = 1;
-    private readonly int maxLineLength;
+    private const int scrollBarSize = 1;
+
     private PSObject? previewedObject;
     private readonly PSPropertyExpression? previewExpression;
     private readonly ScrollView<ConsoleString> scrollView;
@@ -18,7 +19,6 @@ internal class PreviewPane
 
     public PreviewPane(PSPropertyExpression? previewExpression, int width, int height)
     {
-        this.maxLineLength = width - 1; // "- 1" to make space for the scrollbar
         this.previewExpression = previewExpression;
         this.scrollView = new ScrollView<ConsoleString>(pageSize: height - headerSize);
 
@@ -120,6 +120,8 @@ internal class PreviewPane
     {
         if (previewExpression == null)
             yield break;
+
+        int maxLineLength = Width - scrollBarSize;
 
         List<PSPropertyExpressionResult> results = previewExpression.GetValues(obj);
         if (results.Count > 0)
