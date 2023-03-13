@@ -4,7 +4,7 @@
 RootModule = 'InteractiveSelect.dll'
 
 # Version number of this module.
-ModuleVersion = '0.9.1'
+ModuleVersion = '0.9.2'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -90,7 +90,7 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/lpatalas/InteractiveSelect/blob/v0.9.1/LICENSE.txt'
+        LicenseUri = 'https://github.com/lpatalas/InteractiveSelect/blob/v0.9.2/LICENSE.txt'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/lpatalas/InteractiveSelect'
@@ -100,9 +100,11 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @"
-v0.9.1
+v0.9.2
 
-- Fix filter key handling for keys that are also bound to Ctrl+? combination
+- Fix word wrapping in preview pane
+- Add `-Width` parameter
+- Set default height to 100%
 "@
 
         # Prerelease string of this module

@@ -1,7 +1,7 @@
 ---
 external help file: InteractiveSelect.dll-Help.xml
 Module Name: InteractiveSelect
-online version: https://github.com/lpatalas/InteractiveSelect/blob/v0.9.1/help/Select-Interactive.md
+online version: https://github.com/lpatalas/InteractiveSelect/blob/v0.9.2/help/Select-Interactive.md
 schema: 2.0.0
 ---
 
