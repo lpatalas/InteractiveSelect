@@ -122,6 +122,6 @@ public class ConsoleStringTests
         var input = ConsoleString.CreatePlainText(inputString);
         var result = input.WordWrap(lineLength);
 
-        result.Should().BeEquivalentTo(expected);
+        result.Should().BeEquivalentTo(expected, opt => opt.ComparingByMembers<ConsoleString>());
     }
 }

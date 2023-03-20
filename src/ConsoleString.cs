@@ -17,6 +17,8 @@ internal readonly struct ConsoleString
 
     private ConsoleString(string value, int contentLength)
     {
+        Debug.Assert(contentLength <= value.Length);
+
         this.ContentLength = contentLength;
         this.value = value;
     }
@@ -167,7 +169,7 @@ internal readonly struct ConsoleString
                     && !isNextCharSpace)
                 {
                     var usedPart = currentLine.ToString(0, lengthUntilLastSpace.Value);
-                    results.Add(new ConsoleString(usedPart, currentLineLength));
+                    results.Add(new ConsoleString(usedPart, lengthUntilLastSpace.Value));
                     currentLine.Remove(0, lengthUntilLastSpace.Value);
                     currentLineLength -= contentLengthUntilLastSpace.Value;
                 }
