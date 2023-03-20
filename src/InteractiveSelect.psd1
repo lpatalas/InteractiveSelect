@@ -4,7 +4,7 @@
 RootModule = 'InteractiveSelect.dll'
 
 # Version number of this module.
-ModuleVersion = '0.9.2'
+ModuleVersion = '0.9.3'
 
 # Supported PSEditions
 CompatiblePSEditions = 'Core'
@@ -90,7 +90,7 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        LicenseUri = 'https://github.com/lpatalas/InteractiveSelect/blob/v0.9.2/LICENSE.txt'
+        LicenseUri = 'https://github.com/lpatalas/InteractiveSelect/blob/v0.9.3/LICENSE.txt'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/lpatalas/InteractiveSelect'
@@ -100,11 +100,9 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @"
-v0.9.2
+v0.9.3
 
-- Fix word wrapping in preview pane
-- Add `-Width` parameter
-- Set default height to 100%
+- Fix line width calculation during word wrapping
 "@
 
         # Prerelease string of this module
